@@ -1,0 +1,13 @@
+randomSeed=1
+maxThreads=8
+crossValidationFolds=8
+evaluation=Accuracy()
+evaluation=Accuracy(labelMapping=L_0L_1-L_2L_3)
+gridSearchParameterValues=c(0.01, 0.02, 0.03, 0.1, 0.2, 0.3, 1, 2, 3, 100, 200, 300, 1000, 2000, 3000)
+model=CLSVM()
+{
+	validLabels=L_0,L_1,L_2,L_3,L_4,L_5,L_6
+	trainingIterations=200
+	factoredCost=LabelPair(c=1)
+}
+feature=Identity(doubleExtractor=Identity)
