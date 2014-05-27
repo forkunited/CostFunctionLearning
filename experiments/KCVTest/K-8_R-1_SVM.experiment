@@ -3,10 +3,10 @@ maxThreads=8
 crossValidationFolds=8
 evaluation=Accuracy()
 evaluation=Accuracy(labelMapping=L_0L_1-L_2L_3)
-gridSearchParameterValues=l2(.00001, .0001, .001, .01, 0.1, 1, 10, 100, 1000)
-model=SVM(n=4)
+gridSearchParameterValues=l2(.001,.01,.1, 1, 10, 100, 1000, 10000)
+model=SVM()
 {
 	validLabels=L_0,L_1,L_2,L_3,L_4,L_5,L_6
-	trainingIterations=200
+	trainingIterations=201
 }
 feature=Identity(doubleExtractor=Identity)
