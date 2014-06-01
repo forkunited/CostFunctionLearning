@@ -46,16 +46,59 @@ to be last on all of your recent papers.  I don't care which our names is
 first though, so feel free to swap if you want.}
 
 \begin{abstract}
-The abstract paragraph should be indented 1/2~inch (3~picas) on both left and
-right-hand margins. Use 10~point type, with a vertical spacing of 11~points.
-The word \textbf{Abstract} must be centered, bold, and in point size 12. Two
-line spaces precede the abstract. The abstract must be limited to one
-paragraph.
+% Fill me in later
 \end{abstract}
 
 \section{Introduction}
 
 \section{Background}
+
+\bmcomment{Cite some paper on using binary svms}
+\bmcomment{Cite multiclass svm}
+\bmcomment{Cite structured svm}
+
+For the multiclass classification problem, we are given a set of
+$m$ labelled training data
+$D=\{(\mathbf{x}_1,\mathbf{y}_1),\hdots,(\mathbf{x}_m)\}$ where each
+example $\mathbf{x}_i\in \mathcal{X}$ is assigned label 
+$\mathbf{y}_i\in\mathcal{Y}$, and we want to learn a function 
+$f:\mathcal{X}\rightarrow\mathcal{Y}$ which gives the correct
+label for any input taken from $\mathcal{X}$.  Past work has developed
+a multiclass support vector machine (SVM) which generalizes ideas
+employed by SVMs in the binary classification domain.  Given that
+$\mathbf{g}:\mathcal{X}\times\mathcal{Y}\rightarrow \mathbb{R}^k$ 
+computes a featurized representation of an input-output pair and
+$\mathbf{l}:\mathcal{Y}\rightarrow\{0,1\}^{|\mathcal{Y}|}$ a 
+vector of indicators representing an output label, the SVM makes 
+predictions according to the function:
+
+\begin{equation}
+\label{prediction}
+f(\mathbf{\mathbf{x};\mathbf{w}})=\argmax_{\mathbf{y}'\in\mathcal{Y}}\Big( \mathbf{w}^\top \mathbf{g}(\mathbf{x},\mathbf{y}')+\mathbf{b}^\top\mathbf{l}(\mathbf{y}') \Big)
+\end{equation}
+
+Where the feature weights $\mathbf{w}$ and label biases $\mathbf{b}$
+are given by the solution to the following optimization problem:
+
+\begin{equation}
+\begin{split}
+\label{objective}
+& \min_{\mathbf{w}, \mathbf{b}} \lambda_2\|\mathbf{w}\|_2^2+ \\
+ & +\sum_{i=1}^N\bigg(-\mathbf{w}^\top \mathbf{g}(\mathbf{x}_i,\mathbf{y}_i)-\mathbf{b}^\top \mathbf{l}(\mathbf{y}_i)+\max_{\mathbf{y}\in \mathcal{Y}}\Big(\mathbf{w}^\top\mathbf{g}(\mathbf{x}_i,\mathbf{y})+\mathbf{b}^\top \mathbf{l}(\mathbf{y})+\Delta(\mathbf{y}_i,\mathbf{y})\Big)\bigg)
+\end{split}
+\end{equation}
+
+In general, we refer to the $\Delta$ as a cost function, where in the above SVM optimization problem, the cost 
+$\Delta(\mathbf{y}_i,\mathbf{y})=\mathbbm{1}(\mathbf{y}_i\neq\mathbf{y})$ 
+indicates whether $\mathbf{y}_i$ is equal to $\mathbf{y}$.  This optimization
+maximizes the 
+ 
+
+-Introduce data, x,y and multi-label classification.
+-Several binary SVMs have been used in the past to do multiclass
+-Crammer and Singer introduce single multiclass classifier
+-Structured SVM has cost that varies depending on structure
+
 
 %- SVM have a cost function
 %- Want to learn this
@@ -86,6 +129,7 @@ paragraph.
 
 \subsection{Future Work}
 
+% Incorporate input features into cost
 % Other choices for n
 % Other measures of 'difficulty'
 % Structured version
@@ -116,6 +160,10 @@ paragraph.
 % Multiclass SVM
 % Crammer, Koby, and Yoram Singer. 
 % ``On the algorithmic implementation of multiclass kernel-based vector machines.'' The Journal of Machine Learning Research 2 (2002): 265-292.
+%
+% Also Multiclass SVM
+% Weston, Jason, and Chris Watkins. Multi-class support vector machines. Technical Report CSD-TR-98-04, Department of Computer Science, 
+% Royal Holloway, University of London, May, 1998.
 %
 % TODO:20newsgroups 
 % 
