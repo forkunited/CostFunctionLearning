@@ -1,15 +1,7 @@
-\BOOKMARK [1][-]{section.1}{Submission of papers to NIPS 2014}{}
-\BOOKMARK [2][-]{subsection.1.1}{Style}{section.1}
-\BOOKMARK [2][-]{subsection.1.2}{Retrieval of style files}{section.1}
-\BOOKMARK [1][-]{section.2}{General formatting instructions}{}
-\BOOKMARK [1][-]{section.3}{Headings: first level}{}
-\BOOKMARK [2][-]{subsection.3.1}{Headings: second level}{section.3}
-\BOOKMARK [3][-]{subsubsection.3.1.1}{Headings: third level}{subsection.3.1}
-\BOOKMARK [1][-]{section.4}{Citations, figures, tables, references}{}
-\BOOKMARK [2][-]{subsection.4.1}{Citations within the text}{section.4}
-\BOOKMARK [2][-]{subsection.4.2}{Footnotes}{section.4}
-\BOOKMARK [2][-]{subsection.4.3}{Figures}{section.4}
-\BOOKMARK [2][-]{subsection.4.4}{Tables}{section.4}
-\BOOKMARK [1][-]{section.5}{Final instructions}{}
-\BOOKMARK [1][-]{section.6}{Preparing PostScript or PDF files}{}
-\BOOKMARK [2][-]{subsection.6.1}{Margins in LaTeX}{section.6}
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [1][-]{section.2}{Background}{}% 2
+\BOOKMARK [1][-]{section.3}{A Cost Learning Model}{}% 3
+\BOOKMARK [1][-]{section.4}{Experiments}{}% 4
+\BOOKMARK [1][-]{section.5}{Discussion}{}% 5
+\BOOKMARK [2][-]{subsection.5.1}{Related Literature}{section.5}% 6
+\BOOKMARK [2][-]{subsection.5.2}{Future Work}{section.5}% 7

@@ -4,11 +4,13 @@
 \usepackage{url}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{bbm}
 
 \DeclareMathOperator*{\argmax}{argmax}
 \DeclareMathOperator*{\argmin}{argmin}
 
-\newcommand{\bmcomment}[1]{\textcolor{green}{\textsc{\textbf{[#1 --wvm]}}}}
+\newcommand{\bmcomment}[1]{\textcolor{blue}{\textsc{\textbf{[#1 --bm]}}}}
+\newcommand{\nascomment}[1]{\textcolor{red}{\textsc{\textbf{[#1 --nas]}}}}
 %\documentstyle[nips14submit_09,times,art10]{article} % For LaTeX 2.09
 
 
@@ -57,66 +59,264 @@ first though, so feel free to swap if you want.}
 
 \section{Introduction}
 
+\bmcomment{General ideas about cost learning abstracted away
+from the SVM details in the next section...?}
+
 \section{Background}
 
-\bmcomment{Cite some paper on using binary svms}
+\bmcomment{I introduced SVMs through the quadratic programming
+formulation because it seemed easier to summarize margin maximization
+across all the relevant SVM variants that way while staying true to the literature... 
+but maybe I should have just kept it in the form
+of an unconstrained optimization problem for continuity with the rest
+of this paper?}
+
+\bmcomment{Cite some paper on using binary svms for multiclass}
+
 \bmcomment{Cite multiclass svm}
+
+\bmcomment{Cite something for margin maximization}
+
 \bmcomment{Cite structured svm}
 
+\bmcomment{Cite example of unreliable output labels}
+
+\bmcomment{Also cite taskar et al for 'margin rescaling'?}
+
+\bmcomment{Might want to give some motivating examples? Not sure if that's
+necessary or not. One example of multiclass domain, and one example where
+cost functions are used in structured domains}
+
+\bmcomment{Mention examples of measures of 'difficulty'? Cite.}
+
 For the multiclass classification problem, we are given a set of
-$m$ labelled training data
-$D=\{(\mathbf{x}_1,\mathbf{y}_1),...,(\mathbf{x}_m, \mathbf{y}_m)\}$ where each
-example $\mathbf{x}_i\in \mathcal{X}$ is assigned label 
-$\mathbf{y}_i\in\mathcal{Y}$, and we want to learn a function 
+$m$ labelled training data instances
+$D=\{(\mathbf{x}_1,\mathbf{y}_1),\hdots,(\mathbf{x}_m, \mathbf{y}_m)\}\subset\mathcal{X}\times\mathcal{Y}$ 
+where each example $\mathbf{x}_i$ is assigned label 
+$\mathbf{y}_i$, and we want to learn a function 
 $f:\mathcal{X}\rightarrow\mathcal{Y}$ which gives the correct
 label for any input taken from $\mathcal{X}$.  Past work has developed
-a multiclass support vector machine (SVM) which generalizes ideas
-employed by SVMs in the binary classification domain.  Given that
+a multiclass support vector machine (SVM) which generalizes the 
+concept of margin maximization employed by classical SVMs for binary
+classification tasks. In particular, assuming that
 $\mathbf{g}:\mathcal{X}\times\mathcal{Y}\rightarrow \mathbb{R}^k$ 
-computes a featurized representation of an input-output pair and
-$\mathbf{l}:\mathcal{Y}\rightarrow\{0,1\}^{|\mathcal{Y}|}$ a 
-vector of indicators representing an output label, the SVM makes 
-predictions according to the function:
+computes a featurized representation of an input-output pair, the 
+multiclass SVM gives a score to a labelled instance $(\mathbf{x},\mathbf{y})$ 
+as:
+
+\begin{equation}
+\label{score}
+F(\mathbf{x},\mathbf{y};\mathbf{w})= \mathbf{w}^\top \mathbf{g}(\mathbf{x},\mathbf{y})
+\end{equation}
+
+And makes predictions according to:
 
 \begin{equation}
 \label{prediction}
-f(\mathbf{\mathbf{x};\mathbf{w}})=\argmax_{\mathbf{y}'\in\mathcal{Y}}\Big( \mathbf{w}^\top \mathbf{g}(\mathbf{x},\mathbf{y}')+\mathbf{b}^\top\mathbf{l}(\mathbf{y}') \Big)
+\hat{f}(\mathbf{x};\mathbf{w})=\argmax_{\mathbf{y}'\in\mathcal{Y}} F(\mathbf{x},\mathbf{y}';\mathbf{w})
 \end{equation}
 
-Where the feature weights $\mathbf{w}$ and label biases $\mathbf{b}$
-are given by the solution to the following optimization problem:
+Where the feature weights $\mathbf{w}$ are given by the
+solution to the following soft-margin maximizing quadratic program:
 
 \begin{equation}
 \begin{split}
-\label{objective}
-& \min_{\mathbf{w}, \mathbf{b}} \lambda_2\|\mathbf{w}\|_2^2+ \\
- & +\sum_{i=1}^N\bigg(-\mathbf{w}^\top \mathbf{g}(\mathbf{x}_i,\mathbf{y}_i)-\mathbf{b}^\top \mathbf{l}(\mathbf{y}_i)+\max_{\mathbf{y}\in \mathcal{Y}}\Big(\mathbf{w}^\top\mathbf{g}(\mathbf{x}_i,\mathbf{y})+\mathbf{b}^\top \mathbf{l}(\mathbf{y})+\Delta(\mathbf{y}_i,\mathbf{y})\Big)\bigg)
+& \min_{\mathbf{\xi}\geq 0, \mathbf{w}}\big(\frac{\lambda_2}{2}\|\mathbf{w}\|_2^2+\frac{1}{m}\sum_{i=1}^m\xi_i\big) \\
+& \text{s.t.     } \forall i : \forall \mathbf{y}\in\mathcal{Y}\backslash\mathbf{y}_i : F(\mathbf{x}_i,\mathbf{y}_i;\mathbf{w})-F(\mathbf{x}_i,\mathbf{y};\mathbf{w})\geq 1-\xi_i
 \end{split}
 \end{equation}
 
-In general, we refer to the $\Delta$ as a cost function, where in the above SVM optimization problem, the cost 
-$\Delta(\mathbf{y}_i,\mathbf{y})=\mathbbm{1}(\mathbf{y}_i\neq\mathbf{y})$ 
-indicates whether $\mathbf{y}_i$ is equal to $\mathbf{y}$.  This optimization
-maximizes the 
- 
+This quadratic program chooses weights that minimize
+the number of misclassified instances while simultaneously
+trying to increase the margin between the scores of 
+correct and incorrect labels, and the $\lambda_2$
+hyper-parameter determines the relative importance of
+these two goals. 
 
--Introduce data, x,y and multi-label classification.
--Several binary SVMs have been used in the past to do multiclass
--Crammer and Singer introduce single multiclass classifier
--Structured SVM has cost that varies depending on structure
+Tsochantaridis et al further generalized the margin maximization
+to make sense for domains where some prediction mistakes are more 
+costly than others (especially domains where $\mathcal{Y}$ contains
+a large number of structured outputs).  They introduce a function 
+$\Delta:\mathcal{Y}\times\mathcal{Y}\rightarrow\mathbb{R}$ that
+determines the cost
+$\Delta(\mathbf{y},\mathbf{\hat{y}})$ of predicting label 
+$\mathbf{\hat{y}}$ when then correct label is $\mathbf{y}$.  
+The $\Delta(\mathbf{y},\mathbf{\hat{y}})$ is larger for more 
+inaccurate $\mathbf{\hat{y}}$ predictions, and 
+$\Delta(\mathbf{y},\mathbf{y})=0$, giving no cost for a correct
+prediction. Tsiochantaridis et al incorporate 
+the cost function into the SVM learning by modifying the 
+multiclass SVM quadratic
+program through 'margin re-scaling' as:\footnote{Tsiochantaridis et al 
+also introduce an alternative 'slack re-scaling' technique, but the 
+present paper mainly builds off of the 'margin re-scaling' approach.}
 
+\begin{equation}
+\label{marginRescaling}
+\begin{split}
+& \min_{\mathbf{\xi}\geq 0, \mathbf{w}}\big(\frac{\lambda_2}{2}\|\mathbf{w}\|_2^2+\frac{1}{m}\sum_{i=1}^m\xi_i\big) \\
+& \text{s.t.     } \forall i : \forall \mathbf{y}\in\mathcal{Y}\backslash\mathbf{y}_i : F(\mathbf{x}_i,\mathbf{y}_i;\mathbf{w})-F(\mathbf{x}_i,\mathbf{y};\mathbf{w})\geq \Delta(\mathbf{y}_i,\mathbf{y})-\xi_i
+\end{split}
+\end{equation}
 
-%- SVM have a cost function
-%- Want to learn this
-%- Explain intuition
-%- Desired properties of the cost function
+Intuitively, this margin re-scaling quadratic program allows 
+the model to choose margins between between scores of 
+$\mathbf{y}_i$ and $\mathbf{\hat{y}}_i$  proportional to
+the prediction cost $\Delta(\mathbf{y}_i,\mathbf{\hat{y}})$.
+This choice biases the model toward making low cost 
+predictions over high cost predictions.
 
-\section{Cost Learning Model}
+Whereas previous work assumes that we hand-select 
+domain-specific cost functions that seem like 
+good measures of the distances between labels, we
+propose learning this function from the data jointly with
+the prediction function $f$.  Similarly to the hand-selected
+cost functions, the learned cost functions
+should reflect some notion of the distance between two
+labels, but as seen from the perspective of the model and its
+features rather than from the perspective of the person 
+engineering the model. In other words, the value of 
+$\Delta(\mathbf{y}, \mathbf{\hat{y}})$ should
+be proportional to the ease with which the model  
+discriminates between $\mathbf{y}$ and $\mathbf{\hat{y}}$
+given its features.  This choice of cost gives the model the
+freedom to shift its weights so that there are wider margins
+between labels which it can easily discriminate, and smaller
+margins between labels which it has difficulty discriminating.
+Such a policy is particularly useful when there are classes
+of incorrect predictions that are difficult or impossible for 
+the model to systematically resolve due to unreliably 
+annotated output labels or a 
+choice of features that is insufficient for the task.
 
-%- With/without n
-%- Intuition
-%- Properties
-%- Values of n
+There are several ways that we might quantify 
+the ease with which the model discriminates between two labels,
+but for now, we will keep the notion of 'easiness' fuzzy while
+establishing its relation to the cost function.
+Basically, we propose that an incorrect prediction 
+$\mathbf{\hat{y}}$ where the actual label is $\mathbf{y}$ can 
+fall into some number of 'incorrect prediction classes', and
+the overall cost of the incorrect prediction is the sum over the
+easiness of resolving (shrinking) each of these classes.  More
+formally, let $\mathcal{S}\subseteq 2^{\mathcal{Y}^2}$ be a 
+collection of incorrect prediction classes that collectively 
+exhausts $\mathcal{Y}^2$.  Assume that the 'easiness' with 
+which a model of type $\mathcal{M}$ (e.g. SVM) given features 
+$\mathbf{g}$ and data $D$ resolves incorrect prediction 
+class $S\in\mathcal{S}$ is given by 
+$\mathcal{E}(S,\mathcal{M},\mathbf{g},D)\in\mathbb{R}$.
+Then, we assume that the cost is given by:
+
+\begin{equation}
+\Delta(\mathbf{y},\mathbf{\hat{y}})=\sum_{S\in\mathcal{S}}\mathcal{E}(S,\mathcal{M},\mathbf{g}, D)\mathbbm{1}((\mathbf{y},\mathbf{\hat{y}})\in S)=
+\mathbf{\mathcal{E}}^\top \mathbf{\mathcal{S}}(\mathbf{y},\mathbf{\hat{y}})
+\end{equation}
+
+There are many possible choices for prediction classes $\mathcal{S}$, but
+we focus on the following simplest ones:
+
+\begin{equation}
+\mathcal{S}_{[\mathcal{Y}]^2} = \{ S_{\{\mathbf{y},\mathbf{y}'\}} | \mathbf{y},\mathbf{y}'\in\mathcal{Y}\}\text{ where }S_{\{\mathbf{y},\mathbf{y}'\}}=\{ (\mathbf{l}, \mathbf{l}') | (\mathbf{l}=\mathbf{y}\wedge \mathbf{l}'=\mathbf{y}')\vee(\mathbf{l}=\mathbf{y}'\wedge \mathbf{l}=\mathbf{y}) \} \\
+\end{equation}
+
+\begin{equation}
+\mathcal{S}_{\mathcal{Y}^2} = \{ S_{(\mathbf{y},\mathbf{y}')} | \mathbf{y},\mathbf{y}'\in\mathcal{Y}\}\text{ where }S_{(\mathbf{y},\mathbf{y}')}=\{ (\mathbf{y},\mathbf{y}') \} \\
+\end{equation}
+
+Given the above definitions, we desire a model which approximates 
+$\mathcal{E}(S,\mathcal{M},\mathbf{g}, D)$ (for some notion of 'easiness')
+in order to estimate the costs while simultaneous learning feature 
+weights $\mathbf{w}$.  
+
+\section{A Cost Learning Model}
+
+\bmcomment{Cite self-paced learning for inspiration for new objective function?}
+
+We propose a cost learning model that follows the assumptions in 
+the previous section along with the intuition that the easiness 
+$\mathcal{E}(S,\mathcal{M},\mathbf{g},D)$ of prediction class $S$ for 
+model class $\mathcal{M}$ is related to the size of the set:
+
+\begin{equation}
+S_{\mathcal{M},\mathbf{g},D}=\{i | (\mathbf{y}_i,\hat{f}^\Delta_{\mathcal{M},\mathbf{g},D}(\mathbf{x}_i;\mathbf{w}_{\mathcal{M},\mathbf{g},D}))\in S\text{ and }(\mathbf{x}_i,\mathbf{y}_i)\in D\}
+\end{equation}
+
+Where $\mathbf{w}_{\mathcal{M},\mathbf{g},D}$ are the learned feature weights,
+and $\hat{f}^\Delta_{\mathcal{M},\mathbf{g},D}$ is the model's prediction
+function augmented with the cost:
+
+\begin{equation}
+\hat{f}^\Delta_{\mathcal{M},\mathbf{g},D}(\mathbf{x}_i;\mathbf{w})=\argmax_{\mathbf{y}\in\mathcal{Y}}\Big( F(\mathbf{x}_i,\mathbf{y};\mathbf{w})
++\Delta(\mathbf{y}_i,\mathbf{y})\Big)
+\end{equation}
+
+The size of $S_{\mathcal{M},\mathbf{g},D}$ is the number of
+training examples with margin violations in class $S$. If
+the size of this set is large, we might infer that the
+model has trouble shrinking it, and so it's not 'easy'.  This 
+might lead us to conclude that $S_{\mathcal{M},\mathbf{g},D}$ 
+tends to decrease with 'easiness'.  However,
+for many data sets and choices of $\mathcal{S}$, the size 
+of each $S_{\mathcal{M},\mathbf{g},D}$ can be inherently
+biased by the data regardless of 'easiness'.  For example, 
+for $S_{\{\mathbf{y},\mathbf{y}'\}}\in\mathcal{S}_{[\mathcal{Y}]^2}$, 
+the size of $S_{\{\mathbf{y},\mathbf{y}'\},\mathcal{M},\mathbf{g},D}$ 
+is biased by the number of examples in the training data which have 
+output labels $\mathbf{y}$ and $\mathbf{y}'$--if there are few 
+training examples of labels 
+$\mathbf{y},\mathbf{y}'\in\mathcal{Y}$, then the size of 
+$S_{\{\mathbf{y}, \mathbf{y}'\},\mathcal{M},\mathbf{g},D}$ 
+will necessarily be small relative to other prediction classes.
+Furthermore, we expect 
+output labels which occur infrequently in the training data to 
+be more difficult for the model to predict correctly, so this
+will lead to the size of 
+$S_{\{\mathbf{y},\mathbf{y}'\},\mathcal{M},\mathbf{g},D}$ 
+increasing with the 'easiness' of 
+$S_{\{\mathbf{y},\mathbf{y}'\}}$ which is opposite the 
+conclusion that that we draw if we think of the size of 
+$S_{\{\mathbf{y},\mathbf{y}'\},\mathcal{M},\mathbf{g},D}$ as
+increasing due to the model's difficulty in shrinking it.  In general, 
+this suggests that if we want the size of $S_{\mathcal{M},\mathbf{g},D}$
+to vary with easiness, we need to normalize it to account for 
+properties of the training data that introduce irrelevant
+biases.  These observations suggest the following measure of easiness:
+
+\begin{equation}
+\mathcal{E}(S,\mathcal{M},\mathbf{g},D)=\max\bigg(0, 1-\frac{|S_{\mathcal{M},\mathbf{g},D}|}{n_{\mathcal{M},\mathbf{g},D}}\bigg)
+\end{equation}
+
+Where $n_{\mathcal{M},\mathbf{g},D}$ is a normalization constant which
+gives the maximum possible value we expect for the size of 
+$S_{\mathcal{M},\mathbf{g},D}$, accounting for irrelevant biases
+introduced by the data as discussed above.  This measure is in
+$[0,1]$, and it has the property that if 
+$|S_{\mathcal{M},\mathbf{g},D}|\geq n_{\mathcal{M},\mathbf{g},D}$,
+then $\mathcal{E}(S,\mathcal{M},\mathbf{g},D)=0$, indicating that
+$S_{\mathcal{M},\mathbf{g},D}$ is so difficult to shrink that its
+size is greater than our expected upper bound.
+
+Given this definition of easiness, we modify the 
+margin re-scaling SVM learning procedure given by quadratic program \ref{marginRescaling} to learn the cost function according to it.  
+First, we transform this quadratic program
+into the equivalent unconstrained optimization problem which we find 
+easier to work with:
+
+\begin{equation}
+\label{svmObjective}
+\min_{\mathbf{w}} \frac{\lambda_2}{2}\|\mathbf{w}\|_2^2 + \sum_{i=1}^m\bigg(-F(\mathbf{x}_i,\mathbf{y}_i;\mathbf{w})+\max_{\mathbf{y}\in \mathcal{Y}}\Big(F(\mathbf{x}_i,\mathbf{y};\mathbf{w})+\Delta(\mathbf{y}_i,\mathbf{y})\Big)\bigg)
+\end{equation}
+
+And we modify this function to include the cost learning as:
+
+\begin{equation}
+\label{costObjective}
+\min_{\mathbf{\mathcal{E}}\geq 0,\mathbf{w}} \frac{\lambda_2}{2}\|\mathbf{w}\|_2^2 + \sum_{i=1}^m\bigg(-F(\mathbf{x}_i,\mathbf{y}_i;\mathbf{w})+\max_{\mathbf{y}\in \mathcal{Y}}\Big(F(\mathbf{x}_i,\mathbf{y};\mathbf{w})+\mathbf{\mathcal{E}}^\top \mathbf{\mathcal{S}}(\mathbf{y}_i,\mathbf{y})\Big)\bigg)-\mathbf{\mathcal{E}}^\top\mathbf{n}+\|\mathcal{E}\|^2_\mathbf{n}
+\end{equation}
+
+%- Intuition, malhobasdfsan norm, solution at differential and non-diff
+%  points
+%- Choices of n
 
 \section{Experiments}
 %- Model implementation
@@ -126,6 +326,40 @@ maximizes the
 %- Reuters
 %- Performance
 %- Learned cost weights, relation to hierarchies
+
+% 20news
+% SVMBase.results.out:Accuracy(): 0.7760223048327137
+% SVMBase.results.out:Accuracy(labelMapping=SecondLevel): 0.8008497079129049
+% SVMBase.results.out:Accuracy(labelMapping=FirstLevel): 0.8653744025491238
+% SVMCLNExpectedLabelPairBase.results.out:Accuracy(): 0.830323951141795
+% SVMCLNExpectedLabelPairBase.results.out:Accuracy(labelMapping=SecondLevel): 0.8556824216675518
+% SVMCLNExpectedLabelPairBase.results.out:Accuracy(labelMapping=FirstLevel): 0.9091874668082847
+% SVMCLNExpectedLabelPairUnorderedBase.results.out:Accuracy(): 0.8307222517259693
+% SVMCLNExpectedLabelPairUnorderedBase.results.out:Accuracy(labelMapping=SecondLevel): 0.8558151885289432
+% SVMCLNExpectedLabelPairUnorderedBase.results.out:Accuracy(labelMapping=FirstLevel): 0.9083908656399363
+% SVMCLNLogicalLabelPairBase.results.out:Accuracy(): 0.8024429102496017
+% SVMCLNLogicalLabelPairBase.results.out:Accuracy(labelMapping=SecondLevel): 0.8271375464684015
+% SVMCLNLogicalLabelPairBase.results.out:Accuracy(labelMapping=FirstLevel): 0.8769251194901753
+% SVMCLNLogicalLabelPairUnorderedBase.results.out:Accuracy(): 0.8376261285183219
+% SVMCLNLogicalLabelPairUnorderedBase.results.out:Accuracy(labelMapping=SecondLevel): 0.86311736590547
+% SVMCLNLogicalLabelPairUnorderedBase.results.out:Accuracy(labelMapping=FirstLevel): 0.9142326075411578
+% SVMCLNNoneLabelPairBase.results.out:Accuracy(): 0.8008497079129049
+% SVMCLNNoneLabelPairBase.results.out:Accuracy(labelMapping=SecondLevel): 0.825942644715879
+% SVMCLNNoneLabelPairBase.results.out:Accuracy(labelMapping=FirstLevel): 0.8751991502920871
+% SVMCLNNoneLabelPairUnorderedBase.results.out:Accuracy(): 0.8011152416356877
+% SVMCLNNoneLabelPairUnorderedBase.results.out:Accuracy(labelMapping=SecondLevel): 0.8256771109930962
+% SVMCLNNoneLabelPairUnorderedBase.results.out:Accuracy(labelMapping=FirstLevel): 0.8750663834306956
+
+% reuters R52
+% SVMBase.results.out:Accuracy(): 0.9213395638629284
+% SVMCLNExpectedLabelPairBase.results.out:Accuracy(): 0.9158878504672897
+% SVMCLNExpectedLabelPairUnorderedBase.results.out:Accuracy(): 0.9170560747663551
+% SVMCLNLogicalLabelPairBase.results.out:Accuracy(): 0.9209501557632399
+% SVMCLNLogicalLabelPairUnorderedBase.results.out:Accuracy(): 0.9158878504672897
+% SVMCLNNoneLabelPairBase.results.out:Accuracy(): 0.9213395638629284
+% SVMCLNNoneLabelPairUnorderedBase.results.out:Accuracy(): 0.919392523364486
+
+
 
 \section{Discussion}
 
