@@ -237,7 +237,7 @@ as $\mathbf{y}$.  Otherwise, if we suspect these two incorrect
 prediction types to differ in easiness, then we might choose 
 $\mathcal{S}_{\mathcal{Y}^2}$.
 
-\section{A Cost Learning Model}
+\section{A cost learning model}
 \label{costLearningModel}
 
 We desire a model which approximates 
@@ -293,7 +293,7 @@ to vary with easiness, we need to normalize it to account for
 properties of the training data that introduce irrelevant
 biases.  
 
-\subsection{A Measure of 'Easiness'}
+\subsection{A measure of 'easiness'}
 
 \bmcomment{Might want to discuss other possibilities, or generally
 refer to other possibilities in future work}
@@ -316,7 +316,7 @@ then $\mathcal{E}(S,\mathcal{M},\mathbf{g},D)=0$, indicating that
 $S_{\mathcal{M},\mathbf{g},D}$ is so difficult to shrink that its
 size is greater than our expected upper bound.
 
-\subsection{A Cost Learning Objective}
+\subsection{A cost learning objective}
 
 \bmcomment{Cite self-paced learning for inspiration for new objective function?}
 
@@ -367,7 +367,7 @@ in a sensible way.
 
 \bmcomment{Fill in details about non-differentiable solutions}
 
-\subsection{Some 'Easiness' Normalization Constants}
+\subsection{Some 'easiness' normalization constants}
 
 \bmcomment{Mention choosing n using baseline 
 SVM especially if this is included in results.  But otherwise
@@ -475,7 +475,7 @@ We compared the performance of the models on the 20 Newsgroups and
 the Reuters-21578 (R52) data sets.  We chose these two data sets
 because they both have a relatively large number of output labels,
 some of which might not be distinctive enough for the SVM to plausibly
-learn well, in which case we expect a gain in performance from
+learn well, in which case we expected a gain in performance from
 CLSVM.
 
 For both of these data sets, the target labels $\mathcal{Y}$ are 
@@ -493,9 +493,30 @@ Where $\mathbf{f}(\mathbf{x})$ is a normalized vector whose elements
 are $\log(1+tf(\mathbf{x},v))$ when $v$ is a unigram in the corpus 
 vocabulary and $tf(\mathbf{x},v)$ is the frequency of $v$ in $\mathbf{x}$.
 
-\subsection{20 Newsgroups}
+Below are some details specific to the 20 Newsgroups and Reuters 
+corpora.
+
+\subsubsection{20 newsgroups}
+
+
+
+\subsubsection{Reuter 21578 (R52)}
 
 \bmcomment{I will fill this in.}
+
+\subsection{Results}
+
+\bmcomment{I will fill this in.}
+
+
+% reuters R52
+% SVMBase.results.out:Accuracy(): 0.9213395638629284
+% SVMCLNExpectedLabelPairBase.results.out:Accuracy(): 0.9158878504672897
+% SVMCLNExpectedLabelPairUnorderedBase.results.out:Accuracy(): 0.9170560747663551
+% SVMCLNLogicalLabelPairBase.results.out:Accuracy(): 0.9209501557632399
+% SVMCLNLogicalLabelPairUnorderedBase.results.out:Accuracy(): 0.9158878504672897
+% SVMCLNNoneLabelPairBase.results.out:Accuracy(): 0.9213395638629284
+% SVMCLNNoneLabelPairUnorderedBase.results.out:Accuracy(): 0.919392523364486
 
 % SVMBase.results.out:Accuracy(): 0.7760223048327137
 % SVMBase.results.out:Accuracy(labelMapping=SecondLevel): 0.8008497079129049
@@ -519,44 +540,34 @@ vocabulary and $tf(\mathbf{x},v)$ is the frequency of $v$ in $\mathbf{x}$.
 % SVMCLNNoneLabelPairUnorderedBase.results.out:Accuracy(labelMapping=SecondLevel): 0.8256771109930962
 % SVMCLNNoneLabelPairUnorderedBase.results.out:Accuracy(labelMapping=FirstLevel): 0.8750663834306956
 
-%- Data 
-%- 20newsgroups
-%- Reuters
 %- Performance
 %- Learned cost weights, relation to hierarchies
-
-\subsection{Reuter 21578 (R52)}
-
-\bmcomment{I will fill this in.}
-
-% reuters R52
-% SVMBase.results.out:Accuracy(): 0.9213395638629284
-% SVMCLNExpectedLabelPairBase.results.out:Accuracy(): 0.9158878504672897
-% SVMCLNExpectedLabelPairUnorderedBase.results.out:Accuracy(): 0.9170560747663551
-% SVMCLNLogicalLabelPairBase.results.out:Accuracy(): 0.9209501557632399
-% SVMCLNLogicalLabelPairUnorderedBase.results.out:Accuracy(): 0.9158878504672897
-% SVMCLNNoneLabelPairBase.results.out:Accuracy(): 0.9213395638629284
-% SVMCLNNoneLabelPairUnorderedBase.results.out:Accuracy(): 0.919392523364486
-
 
 
 \section{Discussion}
 
-\subsection{Related Literature}
+\subsection{Related literature}
 
 % See possible reference list below
 \bmcomment{I have trouble writing this part.}
 
-\subsection{Future Work}
+\subsection{Future work}
 
 \bmcomment{There's probably lots of stuff I don't know about
 which could go here.  Here are some ideas though:}
+
 \bmcomment{Incorporate input features into cost}
+
 \bmcomment{Other choices for n}
+
 \bmcomment{Other measures of 'easiness'}
+
 \bmcomment{Structured version}
+
 \bmcomment{Alternating minimization version}
+
 \bmcomment{Relationship between model 'difficulty' and 'task' difficulty}
+
 \bmcomment{Characterize properties of data/features that determine whether cost learning is useful}
 
 %\subsubsection*{Acknowledgments}
