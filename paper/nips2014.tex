@@ -434,7 +434,7 @@ distribution independent of the inputs.
 
 \bmcomment{Add graphs showing convergence of SGD?}
 
-We implemented the multiclass SVM and cost learning SVM (CLSVM) 
+We implemented the multiclass SVM and normalized cost learning SVM (SVMCLN) 
 using stochastic gradient descent (SGD) to approximate objectives
 \ref{svmObjective} and \ref{costObjective}.  Our SGD implementation
 used a learning rate of $\frac{1}{\lambda_2 t}$ at time-step $t$.
@@ -454,7 +454,7 @@ expected some noisiness in its convergence.  In general, we
 ran SGD for 150 iterations over the random permutations
 of the full data. At this point, the accuracy and predictions 
 of each model on the dev/test sets would be relatively stable.
-In particular, the accuracy would vary by at most $~.1\%$ and 
+In particular, the accuracy would vary by at most $~0.001$ and 
 fewer than at most $5\%$ of the predictions would change 
 across 10 full iterations over the training data. 
 
@@ -476,7 +476,7 @@ the Reuters-21578 (R52) data sets.  We chose these two data sets
 because they both have a relatively large number of output labels,
 some of which might not be distinctive enough for the SVM to plausibly
 learn well, in which case we expected a gain in performance from
-CLSVM.
+SVMCLN.
 
 For both of these data sets, the target labels $\mathcal{Y}$ are 
 single document topics/categories, and the inputs $\mathcal{X}$ are
@@ -498,7 +498,7 @@ corpora.
 
 \subsubsection{20 newsgroups}
 
-
+\bmcomment{I will fill this in.}
 
 \subsubsection{Reuter 21578 (R52)}
 
@@ -509,36 +509,25 @@ corpora.
 \bmcomment{I will fill this in.}
 
 
-% reuters R52
-% SVMBase.results.out:Accuracy(): 0.9213395638629284
-% SVMCLNExpectedLabelPairBase.results.out:Accuracy(): 0.9158878504672897
-% SVMCLNExpectedLabelPairUnorderedBase.results.out:Accuracy(): 0.9170560747663551
-% SVMCLNLogicalLabelPairBase.results.out:Accuracy(): 0.9209501557632399
-% SVMCLNLogicalLabelPairUnorderedBase.results.out:Accuracy(): 0.9158878504672897
-% SVMCLNNoneLabelPairBase.results.out:Accuracy(): 0.9213395638629284
-% SVMCLNNoneLabelPairUnorderedBase.results.out:Accuracy(): 0.919392523364486
 
-% SVMBase.results.out:Accuracy(): 0.7760223048327137
-% SVMBase.results.out:Accuracy(labelMapping=SecondLevel): 0.8008497079129049
-% SVMBase.results.out:Accuracy(labelMapping=FirstLevel): 0.8653744025491238
-% SVMCLNExpectedLabelPairBase.results.out:Accuracy(): 0.830323951141795
-% SVMCLNExpectedLabelPairBase.results.out:Accuracy(labelMapping=SecondLevel): 0.8556824216675518
-% SVMCLNExpectedLabelPairBase.results.out:Accuracy(labelMapping=FirstLevel): 0.9091874668082847
-% SVMCLNExpectedLabelPairUnorderedBase.results.out:Accuracy(): 0.8307222517259693
-% SVMCLNExpectedLabelPairUnorderedBase.results.out:Accuracy(labelMapping=SecondLevel): 0.8558151885289432
-% SVMCLNExpectedLabelPairUnorderedBase.results.out:Accuracy(labelMapping=FirstLevel): 0.9083908656399363
-% SVMCLNLogicalLabelPairBase.results.out:Accuracy(): 0.8024429102496017
-% SVMCLNLogicalLabelPairBase.results.out:Accuracy(labelMapping=SecondLevel): 0.8271375464684015
-% SVMCLNLogicalLabelPairBase.results.out:Accuracy(labelMapping=FirstLevel): 0.8769251194901753
-% SVMCLNLogicalLabelPairUnorderedBase.results.out:Accuracy(): 0.8376261285183219
-% SVMCLNLogicalLabelPairUnorderedBase.results.out:Accuracy(labelMapping=SecondLevel): 0.86311736590547
-% SVMCLNLogicalLabelPairUnorderedBase.results.out:Accuracy(labelMapping=FirstLevel): 0.9142326075411578
-% SVMCLNNoneLabelPairBase.results.out:Accuracy(): 0.8008497079129049
-% SVMCLNNoneLabelPairBase.results.out:Accuracy(labelMapping=SecondLevel): 0.825942644715879
-% SVMCLNNoneLabelPairBase.results.out:Accuracy(labelMapping=FirstLevel): 0.8751991502920871
-% SVMCLNNoneLabelPairUnorderedBase.results.out:Accuracy(): 0.8011152416356877
-% SVMCLNNoneLabelPairUnorderedBase.results.out:Accuracy(labelMapping=SecondLevel): 0.8256771109930962
-% SVMCLNNoneLabelPairUnorderedBase.results.out:Accuracy(labelMapping=FirstLevel): 0.8750663834306956
+\begin{table}[t]
+\caption{Micro-averaged Accuracies}
+\label{sample-table}
+\begin{center}
+\begin{tabular}{lllcccc}
+\bf{Model}  & \bf{$\mathbf{n}$} & \bf{$\mathcal{S}$} & \bf{20news} & \bf{20news level 2}   & \bf{20news level 1}   & \bf{Reuters}
+\\ \hline \\
+SVM         & N/A               & N/A                & 0.7760      & 0.8008                & 0.8654                & 0.9213 \\
+SVMCLN      & None              & $\mathcal{Y}^2$    & 0.8008      & 0.8259                & 0.8752                & 0.9213 \\ 
+SVMCLN      & None              & $[\mathcal{Y}]^2$  & 0.8011      & 0.8257                & 0.8751                & 0.9194 \\
+SVMCLN      & Logical           & $\mathcal{Y}^2$    & 0.8024      & 0.8271                & 0.8769                & 0.9210 \\ 
+SVMCLN      & Logical           & $[\mathcal{Y}]^2$  & 0.8376      & 0.8631                & 0.9142                & 0.9159 \\
+SVMCLN      & Expected          & $\mathcal{Y}^2$    & 0.8303      & 0.8557                & 0.9092                & 0.9159 \\ 
+SVMCLN      & Expected          & $[\mathcal{Y}]^2$  & 0.8307      & 0.8558                & 0.9084                & 0.9171 \\
+\end{tabular}
+\end{center}
+\end{table}
+
 
 %- Performance
 %- Learned cost weights, relation to hierarchies
