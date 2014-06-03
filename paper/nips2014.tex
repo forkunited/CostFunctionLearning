@@ -54,7 +54,7 @@ to be last on all of your recent papers.  I don't care which our names is
 first though, so feel free to swap if you want.}
 
 \begin{abstract}
-% Fill me in later
+\bmcomment{I have trouble writing this part.}
 \end{abstract}
 
 \section{Introduction}
@@ -238,6 +238,7 @@ prediction types to differ in easiness, then we might choose
 $\mathcal{S}_{\mathcal{Y}^2}$.
 
 \section{A Cost Learning Model}
+\label{costLearningModel}
 
 We desire a model which approximates 
 $\mathcal{E}(S,\mathcal{M},\mathbf{g}, D)$ (for some notion of 
@@ -294,6 +295,9 @@ biases.
 
 \subsection{A Measure of 'Easiness'}
 
+\bmcomment{Might want to discuss other possibilities, or generally
+refer to other possibilities in future work}
+
 The above observations suggest the following as a possible 
 measure of 'easiness':
 
@@ -336,13 +340,13 @@ And we modify this function to include the cost learning as:
 
 \begin{equation}
 \label{costObjective}
-\min_{\mathbf{\mathcal{\hat{E}}}\geq 0,\mathbf{w}} \frac{\lambda_2}{2}\|\mathbf{w}\|_2^2 + \sum_{i=1}^m\bigg(-F(\mathbf{x}_i,\mathbf{y}_i;\mathbf{w})+\max_{\mathbf{y}\in \mathcal{Y}}\Big(F(\mathbf{x}_i,\mathbf{y};\mathbf{w})+\mathbf{\mathcal{\hat{E}}}^\top \mathbf{\mathcal{S}}(\mathbf{y}_i,\mathbf{y})\Big)\bigg)-\mathbf{\mathcal{\hat{E}}}^\top\mathbf{n}+\|\mathbf{\mathcal{\hat{E}}}\|^2_\mathbf{n}
+\min_{\mathbf{\mathcal{\hat{E}}}\geq 0,\mathbf{w}} \frac{\lambda_2}{2}\|\mathbf{w}\|_2^2 + \sum_{i=1}^m\bigg(-F(\mathbf{x}_i,\mathbf{y}_i;\mathbf{w})+\max_{\mathbf{y}\in \mathcal{Y}}\Big(F(\mathbf{x}_i,\mathbf{y};\mathbf{w})+\mathbf{\mathcal{\hat{E}}}^\top \mathbf{\mathcal{S}}(\mathbf{y}_i,\mathbf{y})\Big)\bigg)-\mathbf{\mathcal{\hat{E}}}^\top\mathbf{n}+\frac{1}{2}\|\mathbf{\mathcal{\hat{E}}}\|^2_\mathbf{n}
 \end{equation}
 
 Where $\mathbf{n}$ is the vector of normalization constants, and 
 $\|\mathbf{\mathcal{\hat{E}}}\|^2_n=\sum_{S\in\mathcal{S}}n_S\mathcal{\hat{E}}_S^2$.\footnote{
   We abbreviate $\mathcal{\hat{E}}(S,\mathcal{M},\mathbf{g},D)$ and 
- $n_{S,\mathcal{M},\mathbf{g},D}$ to $\mathcal{\hat{E}}_S$ and $n_S$ for 
+ $n_{S,\mathcal{M},\mathbf{g},D}$ as $\mathcal{\hat{E}}_S$ and $n_S$ for 
  readability.
 }
 Intuitively, this new objective function uses the 
@@ -365,9 +369,67 @@ in a sensible way.
 
 \subsection{Some 'Easiness' Normalization Constants}
 
+\bmcomment{Mention choosing n using baseline 
+SVM especially if this is included in results.  But otherwise
+maybe put it in future work since choosing n based on other
+models is a general topic to explore}
 
+The appropriate choice for the normalization vector $\mathbf{n}$ in 
+objective \ref{costObjective} depends on the prediction classes
+$\mathcal{S}$ and the type of irrelevant bias we are trying to
+remove from 'easiness' measure. For $\mathcal{S}_{[\mathcal{Y}]^2}$
+and $\mathcal{S}_{\mathcal{Y}^2}$, we want to remove the bias introduced
+into the size of the prediction classes by non-uniform label 
+distributions, as discussed at the beginning of section
+\ref{costLearningModel}.  Otherwise, the model will tend to over-estimate
+the costs of incorrect predictions involving labels that occur 
+infrequently in the training data.  The following are two 
+plausible choices of $\mathbf{n}$ to achieve this goal. In each,
+assume that $D_\mathbf{y}$ is the set of training examples
+for which $\mathbf{y}$ is the correct label.
+
+\begin{enumerate}
+
+\item \textbf{Logical} $\mathbf{n}$: Choose $n_S$ as an upper bound
+on $|S|$ that cannot possibly be violated given the training data. 
+For prediction classes 
+$S_{\mathbf{y},\mathbf{y'}}\in\mathcal{S}_{\mathcal{Y}^2}$, 
+choose $n_{S_{\mathbf{y},\mathbf{y'}}}=|D_\mathbf{y}|$, and for prediction 
+classes 
+$S_{\{\mathbf{y},\mathbf{y'}\}}\in\mathcal{S}_{[\mathcal{Y}]^2}$,
+choose 
+$n_{S_{\{\mathbf{y},\mathbf{y'}\}}}=
+\max\big(|D_\mathbf{y}|,|D_\mathbf{y'}|\big)$.
+
+\item \textbf{Expected} $\mathbf{n}$:  Choose $n_S$ as the expected
+number of times a model makes a mistake in $S$ if it predicts labels
+at random according to their distribution in the training data. 
+For prediction classes 
+$S_{\mathbf{y},\mathbf{y'}}\in\mathcal{S}_{\mathcal{Y}^2}$, 
+choose $n_{S_{\mathbf{y},\mathbf{y'}}}=
+\frac{|D_\mathbf{y}||D_\mathbf{y'}|}{m}$, 
+and for prediction classes 
+$S_{\{\mathbf{y},\mathbf{y'}\}}\in\mathcal{S}_{[\mathcal{Y}]^2}$,
+choose 
+$n_{S_{\{\mathbf{y},\mathbf{y'}\}}}=
+\frac{2|D_\mathbf{y}||D_\mathbf{y'}|}{m}$.
+Other variations of this idea might choose alternative models by which
+to compute the expectation, but model that makes predictions at
+according to the training data label distribution seems 
+reasonable for getting rid of the label distribution bias.
+
+\end{enumerate}
+
+In general, the \textbf{Logical} choice of $\mathbf{n}$ is an upper
+bound on the \textbf{Expected} choice.  The \textbf{Logical} choice
+will tend to over-estimate the maximum size of each prediction class,
+but we might choose it over \textbf{Expected} if we have reason
+to believe that it is difficult to estimate the baseline rate at
+which the model is biased to predict certain labels by the label
+distribution independent of the inputs.
 
 \section{Experiments}
+
 %- Model implementation
 %- Pegasos
 %- Data 
@@ -375,8 +437,12 @@ in a sensible way.
 %- Reuters
 %- Performance
 %- Learned cost weights, relation to hierarchies
+\bmcomment{I will fill this in.}
 
-% 20news
+\subsection{20 Newsgroups}
+
+\bmcomment{I will fill this in.}
+
 % SVMBase.results.out:Accuracy(): 0.7760223048327137
 % SVMBase.results.out:Accuracy(labelMapping=SecondLevel): 0.8008497079129049
 % SVMBase.results.out:Accuracy(labelMapping=FirstLevel): 0.8653744025491238
@@ -399,6 +465,10 @@ in a sensible way.
 % SVMCLNNoneLabelPairUnorderedBase.results.out:Accuracy(labelMapping=SecondLevel): 0.8256771109930962
 % SVMCLNNoneLabelPairUnorderedBase.results.out:Accuracy(labelMapping=FirstLevel): 0.8750663834306956
 
+\subsection{Reuter 21578 (R52)}
+
+\bmcomment{I will fill this in.}
+
 % reuters R52
 % SVMBase.results.out:Accuracy(): 0.9213395638629284
 % SVMCLNExpectedLabelPairBase.results.out:Accuracy(): 0.9158878504672897
@@ -415,16 +485,19 @@ in a sensible way.
 \subsection{Related Literature}
 
 % See possible reference list below
+\bmcomment{I have trouble writing this part.}
 
 \subsection{Future Work}
 
-% Incorporate input features into cost
-% Other choices for n
-% Other measures of 'easiness'
-% Structured version
-% Alternating minimization version
-% Relationship between model 'difficulty' and 'task' difficulty
-% Characterize properties of data/features that determine whether cost learning is useful
+\bmcomment{There's probably lots of stuff I don't know about
+which could go here.  Here are some ideas though:}
+\bmcomment{Incorporate input features into cost}
+\bmcomment{Other choices for n}
+\bmcomment{Other measures of 'easiness'}
+\bmcomment{Structured version}
+\bmcomment{Alternating minimization version}
+\bmcomment{Relationship between model 'difficulty' and 'task' difficulty}
+\bmcomment{Characterize properties of data/features that determine whether cost learning is useful}
 
 %\subsubsection*{Acknowledgments}
 
@@ -434,7 +507,9 @@ in a sensible way.
 %final paper. 
 
 \subsubsection*{References}
-% Here are some references to possibly include
+
+\bmcomment{See comments in source for partial list of references}
+
 %
 % TODO: Things about convexity
 %
