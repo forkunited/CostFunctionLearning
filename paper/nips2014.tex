@@ -430,14 +430,68 @@ distribution independent of the inputs.
 
 \section{Experiments}
 
-%- Model implementation
-%- Pegasos
-%- Data 
-%- 20newsgroups
-%- Reuters
-%- Performance
-%- Learned cost weights, relation to hierarchies
-\bmcomment{I will fill this in.}
+\bmcomment{Cite Pegasos for SGD learning rate}
+
+\bmcomment{Add graphs showing convergence of SGD?}
+
+We implemented the multiclass SVM and cost learning SVM (CLSVM) 
+using stochastic gradient descent (SGD) to approximate objectives
+\ref{svmObjective} and \ref{costObjective}.  Our SGD implementation
+used a learning rate of $\frac{1}{\lambda_2 t}$ at time-step $t$.
+We ran several experiments to compare these models on standard
+text classification corpora.  In each experiment, we compared 
+the we used the standard train/test split given by the respective
+data corpus, while also randomly selecting a 10\% subset of the 
+training data to use as a dev set.  We used the dev set to perform
+a grid search over 16 possible values ranging from $10^{-6}$ to 
+$0.5\times 10^2$ for the $\lambda_2$ hyper-parameter in each model.
+After the grid search, we fixed the best value for $\lambda_2$,
+and retrained on the full training data (including the dev set),
+evaluating the final performance of the model on the test set.  
+ 
+Due to the stochasticity of the optimization algorithm, we 
+expected some noisiness in its convergence.  In general, we 
+ran SGD for 150 iterations over the random permutations
+of the full data. At this point, the accuracy and predictions 
+of each model on the dev/test sets would be relatively stable.
+In particular, the accuracy would vary by at most $~.1\%$ and 
+fewer than at most $5\%$ of the predictions would change 
+across 10 full iterations over the training data. 
+
+\subsection{Datasets}
+
+\bmcomment{Cite 20 newsgroups and Reuters R52}
+
+\bmcomment{Cite \url{http://www.aaai.org/Papers/AAAI/2006/AAAI06-121.pdf}
+on relatively low difference in performance between log(tf) and tfidf}
+
+\bmcomment{Cite \url{http://qwone.com/~jason/writing/loocv.pdf} for 
+example use of log(tf)}
+
+\bmcomment{Preprocessed using method from 
+\url{http://web.ist.utl.pt/acardoso/docs/2007-phd-thesis.pdf}}
+
+We compared the performance of the models on the 20 Newsgroups and
+the Reuters-21578 (R52) data sets.  We chose these two data sets
+because they both have a relatively large number of output labels,
+some of which might not be distinctive enough for the SVM to plausibly
+learn well, in which case we expect a gain in performance from
+CLSVM.
+
+For both of these data sets, the target labels $\mathcal{Y}$ are 
+single document topics/categories, and the inputs $\mathcal{X}$ are
+documents.  We preprocessed each text document from both corpora 
+using the procedure given in [FILL IN] (convert to lower-case, 
+remove symbols, etc), and then we computed $\mathbf{g}$ as normalized
+$\log$ unigram term-frequency features.  In particular,
+
+\begin{equation}
+\mathbf{g}_{\mathbf{y'}}(\mathbf{x},\mathbf{y}) = \mathbbm{1}(\mathbf{y}=\mathbf{y'})\mathbf{f}(\mathbf{x})
+\end{equation}
+
+Where $\mathbf{f}(\mathbf{x})$ is a normalized vector whose elements 
+are $\log(1+tf(\mathbf{x},v))$ when $v$ is a unigram in the corpus 
+vocabulary and $tf(\mathbf{x},v)$ is the frequency of $v$ in $\mathbf{x}$.
 
 \subsection{20 Newsgroups}
 
@@ -464,6 +518,12 @@ distribution independent of the inputs.
 % SVMCLNNoneLabelPairUnorderedBase.results.out:Accuracy(): 0.8011152416356877
 % SVMCLNNoneLabelPairUnorderedBase.results.out:Accuracy(labelMapping=SecondLevel): 0.8256771109930962
 % SVMCLNNoneLabelPairUnorderedBase.results.out:Accuracy(labelMapping=FirstLevel): 0.8750663834306956
+
+%- Data 
+%- 20newsgroups
+%- Reuters
+%- Performance
+%- Learned cost weights, relation to hierarchies
 
 \subsection{Reuter 21578 (R52)}
 
