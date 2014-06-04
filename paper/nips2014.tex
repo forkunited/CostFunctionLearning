@@ -541,12 +541,16 @@ likely decreases with their relatedness.
 
 \bmcomment{All 20news table numbers are wrong.  Need to fix them after experiments rerun.}
 
-Table~\ref{accuraciesTable} shows the micro-averaged accuracies on the Reuters
-and 20 newsgroups tasks for the SVM baseline model and versions of SVMCLN with
-different choices of normalization constants $\mathbf{n}$ and incorrect prediction
-classes $\mathcal{S}$.  None of the SVMCLN variations improve the accuracy over
-the SVM on the Reuters task, but inspection of the confusion matrix for the SVM
-baseline provides some intuition for this lack of improvement.  The matrix shows
+Table~\ref{accuraciesTable} shows the micro-averaged
+accuracies on the Reuters and 20 newsgroups tasks for the 
+SVM baseline model and versions of SVMCLN with
+different choices of normalization constants 
+$\mathbf{n}$ and incorrect prediction classes $\mathcal{S}$.  The last column 
+in the table shows that none of the SVMCLN variations improve the
+ ccuracy over the SVM on the Reuters task, but inspection of the 
+confusion matrix for the SVM
+baseline provides some intuition for this lack of improvement.  
+The matrix shows
 that $53\%$ of the SVM's mistakes were on examples with whose topics had 10 or
 fewer test examples, all off which were predicted incorrectly.  Furthermore,
 there is no non-diagonal element in the confusion matrix with more than 10 
@@ -559,18 +563,28 @@ any incorrect prediction classes.  In hindsight, this provides a good example
 of a good example of how analysis of the errors made by the standard SVM can
 determine whether cost learning will be beneficial.
 
-In contrast, every SVMCLN variation appears to give significantly improved accuracy 
-over the SVM on the 20 Newsgroups data.  
+In contrast, the fourth column of Table~\ref{accuraciesTable} shows that 
+every SVMCLN variation improves the accuracy over the SVM on the 20 Newsgroups 
+data.  Unsurprisingly, the \textbf{Logical} 
+and \textbf{Expected} normalized versions
+perform better than the non-normalized versions since they should give better
+estimates of the 'easiness' measure and cost function.  Also, each 
+$\mathcal{S}_{[\mathcal{Y}]^2}$ version performs slightly better than 
+each $\mathcal{S}_{[\mathcal{Y}]^2}$ version, which makes sense given that
+the ease of resolving mistakes in $S_{\mathbf{y},\mathbf{y}'}$ should be 
+the same as the ease of resolving mistakes in $S_{\mathbf{y}',\mathbf{y}}$,
+and so the ordering on $\mathbf{y}$ and $\mathbf{y}'$ gives the model
+unnecessary extra parameters.  We also expected 
+\textbf{Expected} to perform better 
+than \textbf{Logical} since \textbf{Logical} 
+over-estimates the maximum value of each incorrect prediction class, but
+this expectation was not met with 
+$\mathcal{S}_{[\mathcal{Y}]^2}$ prediction
+classes, possibly because the \textbf{Expected} normalizers tend 
+to under-estimate.
 
 
-%- Performance
-%	- SVM baseline and cost learning
-%	- Unordered performs at least as well as ordered
-%	- Logical and expected n perform better than no normalization
-%     - This is what we expected since no normalization won't properly learn costs
-%
 %- Learned cost weights for each model, relation to hierarchies
-
 % - Measured accuracies on hierarchy
 
 \begin{table}[t]
