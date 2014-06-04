@@ -7,4 +7,25 @@ Ioannis Tsochantaridis, Thomas Hofmann, Thorsten Joachims, and Yasemin Altun.
 \newblock In {\em Proceedings of the twenty-first international conference on
   Machine learning}, page 104. ACM, 2004.
 
+\bibitem{vapnik1998statistical}
+Vladimir~N Vapnik.
+\newblock Statistical learning theory (adaptive and learning systems for signal
+  processing, communications and control series), 1998.
+
+\bibitem{crammer2002algorithmic}
+Koby Crammer and Yoram Singer.
+\newblock On the algorithmic implementation of multiclass kernel-based vector
+  machines.
+\newblock {\em The Journal of Machine Learning Research}, 2:265--292, 2002.
+
+\bibitem{weston1998multi}
+Jason Weston and Chris Watkins.
+\newblock Multi-class support vector machines.
+\newblock Technical report, Citeseer, 1998.
+
+\bibitem{koller2003max}
+Ben Taskar Carlos Guestrin~Daphne Koller.
+\newblock Max-margin markov networks.
+\newblock 2003.
+
 \end{thebibliography}

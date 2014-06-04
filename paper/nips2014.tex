@@ -79,17 +79,7 @@ but maybe I should have just kept it in the form
 of an unconstrained optimization problem for continuity with the rest
 of this paper?}
 
-\bmcomment{Cite some paper on using binary svms for multiclass}
-
-\bmcomment{Cite multiclass svm}
-
-\bmcomment{Cite something for margin maximization}
-
-\bmcomment{Cite structured svm}
-
 \bmcomment{Cite example of unreliable output labels}
-
-\bmcomment{Also cite taskar et al for 'margin rescaling'?}
 
 \bmcomment{Might want to give some motivating examples? Not sure if that's
 necessary or not. One example of multiclass domain, and one example where
@@ -103,10 +93,15 @@ $D=\{(\mathbf{x}_1,\mathbf{y}_1),\hdots,(\mathbf{x}_m, \mathbf{y}_m)\}\subset\ma
 where each example $\mathbf{x}_i$ is assigned label 
 $\mathbf{y}_i$, and we want to learn a function 
 $f:\mathcal{X}\rightarrow\mathcal{Y}$ which gives the correct
-label for any input taken from $\mathcal{X}$.  Past work has developed
+label for any input taken from $\mathcal{X}$.\footnote{
+We borrow heavily from the notation used in \citep{tsochantaridis2004support}.
+}  Past work has developed
 a multiclass support vector machine (SVM) which generalizes the 
 concept of margin maximization employed by classical SVMs for binary
-classification tasks. In particular, assuming that
+classification tasks
+\citep{vapnik1998statistical}\citep{crammer2002algorithmic}\citep{weston1998multi}. 
+
+In particular, assuming that
 $\mathbf{g}:\mathcal{X}\times\mathcal{Y}\rightarrow \mathbb{R}^k$ 
 computes a featurized representation of an input-output pair, the 
 multiclass SVM gives a score to a labelled instance $(\mathbf{x},\mathbf{y})$ 
@@ -145,19 +140,22 @@ we omit from our descriptions for readability, but these
 biases were included in the implementations we used for
 our experiments.}
 
-Tsochantaridis et al. further generalized the margin maximization
+Tsochantaridis et al. and Taskar et al. further generalized 
+the margin maximization
 to make sense for domains where some prediction mistakes are more 
 costly than others (especially domains where $\mathcal{Y}$ contains
-a large number of structured outputs) \citep{tsochantaridis2004support}.  They introduce a function 
+a large number of structured outputs) 
+\citep{tsochantaridis2004support}\citep{koller2003max}.  
+They introduce a function 
 $\Delta:\mathcal{Y}\times\mathcal{Y}\rightarrow\mathbb{R}$ that
 determines the cost
 $\Delta(\mathbf{y},\mathbf{\hat{y}})$ of predicting label 
-$\mathbf{\hat{y}}$ when then correct label is $\mathbf{y}$.  
+$\mathbf{\hat{y}}$ when the correct label is $\mathbf{y}$.  
 The $\Delta(\mathbf{y},\mathbf{\hat{y}})$ is larger for more 
 inaccurate $\mathbf{\hat{y}}$ predictions, and 
-$\Delta(\mathbf{y},\mathbf{y})=0$, giving no cost for a correct
-prediction. Tsiochantaridis et al. incorporate 
-the cost function into the SVM learning by modifying the 
+$\Delta(\mathbf{y},\mathbf{y})=0$ giving no cost for a correct
+prediction. This cost function is incorporated
+into the SVM learning by modifying the 
 multiclass SVM quadratic
 program through 'margin re-scaling' as:\footnote{Tsiochantaridis et al. 
 also introduce an alternative 'slack re-scaling' technique, but the 
@@ -730,24 +728,5 @@ bibliography command is the wrong size font.  Needs to
 be the size of a 'third level heading'.  How to change this?}
 
 \bibliography{refs}
-
-% Here's how things are formatted in the NIPS template:
-%
-%
-%\small{
-%[1] Alexander, J.A. \& Mozer, M.C. (1995) Template-based algorithms
-%for connectionist rule extraction. In G. Tesauro, D. S. Touretzky
-%and T.K. Leen (eds.), {\it Advances in Neural Information Processing
-%Systems 7}, pp. 609-616. Cambridge, MA: MIT Press.
-
-%[2] Bower, J.M. \& Beeman, D. (1995) {\it The Book of GENESIS: Exploring
-%Realistic Neural Models with the GEneral NEural SImulation System.}
-%New York: TELOS/Springer-Verlag.
-
-%[3] Hasselmo, M.E., Schnell, E. \& Barkai, E. (1995) Dynamics of learning
-%and recall at excitatory recurrent synapses and cholinergic modulation
-%in rat hippocampal region CA3. {\it Journal of Neuroscience}
-%{\bf 15}(7):5249-5262.
-%}
 
 \end{document}
