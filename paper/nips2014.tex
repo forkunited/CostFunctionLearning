@@ -621,16 +621,17 @@ The cost learning should learn a notion of distance between topics
 approximated by the cost function, and we expect this notion of distance
 to approximate the notion of distance encoded by the hierarchy.  The 
 approximated notion of distance encoded in the cost function should 
-cause SVMCLN to improve at distinguishing topics that are far apart
-from each other by the notion of distance approximated by the cost 
-function.  So if SVMCLN's learned distances approximate the distances
-through the hierarchy, then we should expect the SVMCLN's collapsed 
+cause SVMCLN to improve at distinguishing topics that it estimates to
+be far apart from each other.  So if SVMCLN's learned distances 
+approximate the distances through the hierarchy, then we should expect the SVMCLN's collapsed 
 accuracy improvements to be nearly as great as the uncollapsed accuracy
 improvements.  This is shown by the [FILL] accuracy improvements in the
 fourth, fifth, and sixth columns of Table~\ref{accuraciesTable} by
 the \textbf{Logical} $\mathcal{S}_{[\mathcal{Y}]^2}$ version of SVMCLN.
 
 \bmcomment{Fix the above paragraph when get new numbers}
+
+
 
 % Learned hierarchy
 
