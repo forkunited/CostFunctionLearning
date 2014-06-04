@@ -336,8 +336,8 @@ Mahalanobis norm}
 \bmcomment{Is there any math I should be more explicit about?}
 
 We can modify the margin re-scaling SVM learning procedure given by 
-quadratic program \ref{marginRescaling} to learn the cost function 
-according to easiness measure \ref{easiness}.
+Quadratic Program~\ref{marginRescaling} to learn the cost function 
+according to the easiness measure shown in Equation~\ref{easiness}.
 First, we transform the quadratic program
 into the equivalent unconstrained optimization problem:
 
@@ -393,13 +393,14 @@ maybe put it in future work since choosing n based on other
 models is a general topic to explore}
 
 The appropriate choice for the normalization vector $\mathbf{n}$ in 
-objective \ref{costObjective} depends on the prediction classes
+Objective~\ref{costObjective} depends on the prediction classes
 $\mathcal{S}$ and the type of irrelevant bias we are trying to
 remove from 'easiness' measure. For $\mathcal{S}_{[\mathcal{Y}]^2}$
 and $\mathcal{S}_{\mathcal{Y}^2}$, we want to remove the bias introduced
 into the size of the prediction classes by non-uniform label 
-distributions, as discussed at the beginning of section
-\ref{costLearningModel}.  Otherwise, the model will tend to over-estimate
+distributions, as discussed at the beginning of 
+Section~\ref{costLearningModel}.  Otherwise, the model will 
+tend to over-estimate
 the costs of incorrect predictions involving labels that occur 
 infrequently in the training data.  The following are two 
 plausible choices of $\mathbf{n}$ to achieve this goal. In each,
@@ -451,14 +452,14 @@ choice than Logical}
 
 \section{Experiments}
 
-\bmcomment{Cite Pegasos for SGD learning rate}
-
 \bmcomment{Add graphs showing convergence of SGD?}
 
 We implemented the multiclass SVM and normalized cost learning SVM (SVMCLN) 
-using stochastic gradient descent (SGD) to approximate objectives
-\ref{svmObjective} and \ref{costObjective}.  Our SGD implementation
-used a learning rate of $\frac{1}{\lambda_2 t}$ at time-step $t$.
+using stochastic (sub-)gradient descent (SGD) to approximate Objectives
+\ref{svmObjective} and \ref{costObjective} (see \citep{yin2003stochastic} on
+SGD).  Our SGD implementation
+used a learning rate of $\frac{1}{\lambda_2 t}$ at time-step $t$ 
+following the Pegasos algorithm in \citep{shalev2011pegasos}.
 We ran several experiments to compare these models on standard
 text classification corpora.  In each experiment, we compared 
 the accuracies of the models on standard train/test split 
