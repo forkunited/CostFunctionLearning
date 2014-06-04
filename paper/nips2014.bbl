@@ -1,0 +1,10 @@
+\begin{thebibliography}{1}
+
+\bibitem{tsochantaridis2004support}
+Ioannis Tsochantaridis, Thomas Hofmann, Thorsten Joachims, and Yasemin Altun.
+\newblock Support vector machine learning for interdependent and structured
+  output spaces.
+\newblock In {\em Proceedings of the twenty-first international conference on
+  Machine learning}, page 104. ACM, 2004.
+
+\end{thebibliography}
