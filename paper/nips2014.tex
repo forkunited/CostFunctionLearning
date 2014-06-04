@@ -5,6 +5,14 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{bbm}
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+\usepackage[sort&compress]{natbib}
+\usepackage{natbibspacing}
+
+\usetikzlibrary{arrows}
+
+\bibliographystyle{unsrt}
 
 \DeclareMathOperator*{\argmax}{argmax}
 \DeclareMathOperator*{\argmin}{argmin}
@@ -137,10 +145,10 @@ we omit from our descriptions for readability, but these
 biases were included in the implementations we used for
 our experiments.}
 
-Tsochantaridis et al further generalized the margin maximization
+Tsochantaridis et al. further generalized the margin maximization
 to make sense for domains where some prediction mistakes are more 
 costly than others (especially domains where $\mathcal{Y}$ contains
-a large number of structured outputs).  They introduce a function 
+a large number of structured outputs) \citep{tsochantaridis2004support}.  They introduce a function 
 $\Delta:\mathcal{Y}\times\mathcal{Y}\rightarrow\mathbb{R}$ that
 determines the cost
 $\Delta(\mathbf{y},\mathbf{\hat{y}})$ of predicting label 
@@ -148,10 +156,10 @@ $\mathbf{\hat{y}}$ when then correct label is $\mathbf{y}$.
 The $\Delta(\mathbf{y},\mathbf{\hat{y}})$ is larger for more 
 inaccurate $\mathbf{\hat{y}}$ predictions, and 
 $\Delta(\mathbf{y},\mathbf{y})=0$, giving no cost for a correct
-prediction. Tsiochantaridis et al incorporate 
+prediction. Tsiochantaridis et al. incorporate 
 the cost function into the SVM learning by modifying the 
 multiclass SVM quadratic
-program through 'margin re-scaling' as:\footnote{Tsiochantaridis et al 
+program through 'margin re-scaling' as:\footnote{Tsiochantaridis et al. 
 also introduce an alternative 'slack re-scaling' technique, but the 
 present paper mainly builds off of the 'margin re-scaling' approach.}
 
@@ -197,7 +205,7 @@ There are several ways that we might quantify
 the ease with which the model discriminates between two labels,
 but for now, we will keep the notion of 'easiness' fuzzy while
 establishing its relation to the cost function.
-Basically, we propose that an incorrect prediction 
+We propose that an incorrect prediction 
 $\mathbf{\hat{y}}$ where the actual label is $\mathbf{y}$ can 
 fall into some number of 'incorrect prediction classes', and
 the overall cost of the incorrect prediction is the sum over the
@@ -217,10 +225,14 @@ Then, we assume that the cost is given by:
 \end{equation}
 
 There are many possible choices for prediction classes $\mathcal{S}$, but
-in this paper, we focus on the following choices:
+in this paper, we focus on the following two:
 
 \begin{equation}
-\mathcal{S}_{[\mathcal{Y}]^2} = \{ S_{\{\mathbf{y},\mathbf{y}'\}} | \mathbf{y},\mathbf{y}'\in\mathcal{Y}\}\text{ where }S_{\{\mathbf{y},\mathbf{y}'\}}=\{ (\mathbf{l}, \mathbf{l}') | (\mathbf{l}=\mathbf{y}\wedge \mathbf{l}'=\mathbf{y}')\vee(\mathbf{l}=\mathbf{y}'\wedge \mathbf{l}=\mathbf{y}) \} \\
+\begin{split}
+& \mathcal{S}_{[\mathcal{Y}]^2} = \{ S_{\{\mathbf{y},\mathbf{y}'\}} | \mathbf{y},\mathbf{y}'\in\mathcal{Y}\} \\
+\text{ where } & S_{\{\mathbf{y},\mathbf{y}'\}}=
+\{ (\mathbf{y}_1, \mathbf{y}_2) | (\mathbf{y}_1=\mathbf{y}\wedge \mathbf{y}_2=\mathbf{y}')\vee(\mathbf{y}_1=\mathbf{y}'\wedge \mathbf{y}_2=\mathbf{y}) \} \\
+\end{split}
 \end{equation}
 
 \begin{equation}
@@ -229,7 +241,7 @@ in this paper, we focus on the following choices:
 
 $\mathcal{S}_{[\mathcal{Y}]^2}$ contains a prediction class for every
 unordered pair of labels, and $\mathcal{S}_{\mathcal{Y}^2}$ contains
-a prediction class for every non-ordered pair.  We might choose 
+a prediction class for every ordered pair.  We might choose 
 $\mathcal{S}_{[\mathcal{Y}]^2}$ when factoring the cost function if
 we believe it is equally easy to resolve misclassifications of 
 $\mathbf{y}$ as $\mathbf{y}'$ and misclassifications of $\mathbf{y}'$
@@ -309,9 +321,9 @@ measure of 'easiness':
 Where $n_{S,\mathcal{M},\mathbf{g},D}$ is a normalization constant which
 gives the maximum possible value we expect for the size of 
 $S_{\mathcal{M},\mathbf{g},D}$, accounting for irrelevant biases
-introduced by the data as discussed above.  This measure is in
-$[0,1]$, and it has the property that if 
-$|S_{\mathcal{M},\mathbf{g},D}|\geq n_{\mathcal{M},\mathbf{g},D}$,
+introduced by the data as discussed above.  This measure of easiness 
+is in $[0,1]$, and it has the property that if 
+$|S_{\mathcal{M},\mathbf{g},D}|\geq n_{S,\mathcal{M},\mathbf{g},D}$,
 then $\mathcal{E}(S,\mathcal{M},\mathbf{g},D)=0$, indicating that
 $S_{\mathcal{M},\mathbf{g},D}$ is so difficult to shrink that its
 size is greater than our expected upper bound.
@@ -349,13 +361,12 @@ $\|\mathbf{\mathcal{\hat{E}}}\|^2_n=\sum_{S\in\mathcal{S}}n_S\mathcal{\hat{E}}_S
  $n_{S,\mathcal{M},\mathbf{g},D}$ as $\mathcal{\hat{E}}_S$ and $n_S$ for 
  readability.
 }
-Intuitively, this new objective function uses the 
+The idea for this new objective function is to use the 
 $-\mathbf{\mathcal{\hat{E}}}^\top\mathbf{n}$ term to select which 
 $\mathcal{\hat{E}}_S$
 should be non-zero (or correspondingly which $S$ are not 
-impossibly difficult), and the $\|\mathcal{\hat{E}}\|^2_\mathbf{n}$ term orders
-these non-zero $\mathcal{\hat{E}}_S$ relative to 
-the normalization constants.
+impossibly difficult), and use the $\|\mathcal{\hat{E}}\|^2_\mathbf{n}$ 
+to limit the magnitude of $\mathcal{\hat{E}}_S$.
 
 If the solution to objective \ref{costObjective} is at point that is 
 differentiable with respect to $\mathcal{\hat{E}}_S$, then it's easy to 
@@ -428,6 +439,9 @@ to believe that it is difficult to estimate the baseline rate at
 which the model is biased to predict certain labels by the label
 distribution independent of the inputs.
 
+\bmcomment{More detail on why Expected might be a better 
+choice than Logical}
+
 \section{Experiments}
 
 \bmcomment{Cite Pegasos for SGD learning rate}
@@ -440,27 +454,27 @@ using stochastic gradient descent (SGD) to approximate objectives
 used a learning rate of $\frac{1}{\lambda_2 t}$ at time-step $t$.
 We ran several experiments to compare these models on standard
 text classification corpora.  In each experiment, we compared 
-the we used the standard train/test split given by the respective
-data corpus, while also randomly selecting a 10\% subset of the 
+the accuracies of the models on standard train/test split 
+given by each respective
+data corpus while also randomly selecting a 10\% subset of the 
 training data to use as a dev set.  We used the dev set to perform
 a grid search over 16 possible values ranging from $10^{-6}$ to 
 $0.5\times 10^2$ for the $\lambda_2$ hyper-parameter in each model.
 After the grid search, we fixed the best value for $\lambda_2$,
-and retrained on the full training data (including the dev set),
+and retrained on the full training data,
 evaluating the final performance of the model on the test set.  
  
 Due to the stochasticity of the optimization algorithm, we 
 expected some noisiness in its convergence.  In general, we 
 ran SGD for 150 iterations over the random permutations
-of the full data. At this point, the accuracy and predictions 
-of each model on the dev/test sets would be relatively stable.
-In particular, the accuracy would vary by at most $~0.001$ and 
-fewer than at most $5\%$ of the predictions would change 
-across 10 full iterations over the training data. 
+of the full data. After the 150 iterations, the accuracy and 
+predictions of each model on the dev/test sets were relatively 
+stable; the accuracy varied by at most $~0.001$ and 
+fewer $5\%$ of the predictions changed 
+during the last 10 iterations over the training 
+data. 
 
 \subsection{Datasets}
-
-\bmcomment{Cite 20 newsgroups and Reuters R52}
 
 \bmcomment{Cite \url{http://www.aaai.org/Papers/AAAI/2006/AAAI06-121.pdf}
 on relatively low difference in performance between log(tf) and tfidf}
@@ -475,15 +489,18 @@ We compared the performance of the models on the 20 Newsgroups and
 the Reuters-21578 (R52) data sets.  We chose these two data sets
 because they both have a relatively large number of output labels,
 some of which might not be distinctive enough for the SVM to plausibly
-learn well, in which case we expected a gain in performance from
-SVMCLN.
+learn well given its features, in which case we might expect a gain in 
+accuracy from SVMCLN.  As shown below, we found out that this 
+expectation was correct for the 20 Newsgroups data, but incorrect for 
+the Reuters data, for reasons that became apparent to us after we
+reviewed the results.
 
 For both of these data sets, the target labels $\mathcal{Y}$ are 
 single document topics/categories, and the inputs $\mathcal{X}$ are
 documents.  We preprocessed each text document from both corpora 
 using the procedure given in [FILL IN] (convert to lower-case, 
 remove symbols, etc), and then we computed $\mathbf{g}$ as normalized
-$\log$ unigram term-frequency features.  In particular,
+$\log$ unigram term-frequency features.  In particular:
 
 \begin{equation}
 \mathbf{g}_{\mathbf{y'}}(\mathbf{x},\mathbf{y}) = \mathbbm{1}(\mathbf{y}=\mathbf{y'})\mathbf{f}(\mathbf{x})
@@ -491,28 +508,54 @@ $\log$ unigram term-frequency features.  In particular,
 
 Where $\mathbf{f}(\mathbf{x})$ is a normalized vector whose elements 
 are $\log(1+tf(\mathbf{x},v))$ when $v$ is a unigram in the corpus 
-vocabulary and $tf(\mathbf{x},v)$ is the frequency of $v$ in $\mathbf{x}$.
+vocabulary and $tf(\mathbf{x},v)$ is the frequency of $v$ in document
+ $\mathbf{x}$.
 
-Below are some details specific to the 20 Newsgroups and Reuters 
-corpora.
+\subsubsection{Reuters 21578 (R52)}
+
+The Reuters-21578 R52 corpus contains 9100 documents from the original
+Reuters-21578 data, each of which is labeled with one of 52 possible topics.
+\footnote{See 
+\url{http://www.csmining.org/index.php/r52-and-r8-of-reuters-21578.html}.}  
+The documents are divided along the Reuters-21578 'ModApte' split
+into \~70\% training and \~30\% test.  The label distribution is extremely
+non-uniform, with 43\% of the documents assigned to a single topic, and
+71\% of the other topics each assigned fewer than 50 (0.5\%) documents.
 
 \subsubsection{20 newsgroups}
 
-\bmcomment{I will fill this in.}
-
-\subsubsection{Reuter 21578 (R52)}
-
-\bmcomment{I will fill this in.}
+The 'by date' version of the 20 Newsgroups data contains 
+18846 documents sorted by date into 60\% for training and 40\% for testing.  
+\footnote{See \url{http://qwone.com/~jason/20Newsgroups/}.} In comparison
+to the Reuters data, the newsgroups distribution of 20 categories is
+nearly uniform, with some topics highly related and some topics entirely
+unrelated.  The relatedness of the topics is approximately captured by
+their hierarchical naming scheme (e.g. there is \textit{rec.autos} and
+\textit{rec.motorcycles} which are likely to be highly related to each
+other, but mostly unrelated to \textit{sci.space}).  We expected that
+this hierarchy would be encoded by the learned 'easiness' approximations,
+since the 'easiness' with which the model discriminates two categories
+likely decreases with their relatedness.
 
 \subsection{Results}
 
-\bmcomment{I will fill this in.}
+\bmcomment{All 20news table numbers are wrong.  Need to fix them after experiments rerun.}
 
+Table~\ref{accuraciesTable} shows the... 
 
+%- Performance
+%	- SVM baseline and cost learning
+%   - Last column shows that cost learning did not help on reuters
+%   	- 
+%	- Unordered performs at least as well as ordered
+%	- Logical and expected n perform better than no normalization
+%     - This is what we expected since no normalization won't properly learn costs
+%
+%- Learned cost weights for each model, relation to hierarchies
 
 \begin{table}[t]
 \caption{Micro-averaged Accuracies}
-\label{sample-table}
+\label{accuraciesTable}
 \begin{center}
 \begin{tabular}{lllcccc}
 \bf{Model}  & \bf{$\mathbf{n}$} & \bf{$\mathcal{S}$} & \bf{20news} & \bf{20news level 2}   & \bf{20news level 1}   & \bf{Reuters}
@@ -528,9 +571,39 @@ SVMCLN      & Expected          & $[\mathcal{Y}]^2$  & 0.8307      & 0.8558     
 \end{center}
 \end{table}
 
-
-%- Performance
-%- Learned cost weights, relation to hierarchies
+%\begin{tikzpicture}
+%\tikzset{grow'=right,level distance=32pt}
+%\tikzset{execute at begin node=\strut}
+%\tikzset{every tree node/.style={anchor=base west}}
+%
+%\Tree [
+%[ the ]
+%[ cat ]
+%]
+%\end{tikzpicture}
+%
+%\begin{tikzpicture}[sloped]
+%\node (a) at (-6,0) {a};
+%\node (b) at (-3,0) {b};
+%\node (c) at (-0.5,0) {c};
+%\node (d) at (0.5,0) {d};
+%\node (e) at (2,0) {e};
+%\node (ab) at (-4.5,3) {};
+%\node (cd) at (0,1) {};
+%\node (cde) at (1,2) {};
+%\node (all) at (-1.5,5) {};
+% 
+%\draw  (a) |- (ab.center);
+%\draw  (b) |- (ab.center);
+%\draw  (c) |- (cd.center);
+%\draw  (d) |- (cd.center);
+%\draw  (e) |- (cde.center);
+%\draw  (cd.center) |- (cde.center);
+%\draw  (ab.center) |- (all.center);
+%\draw  (cde.center) |- (all.center);
+% 
+%\draw[->,-triangle 60] (-7,0) -- node[above]{distance} (-7,6);
+%\end{tikzpicture}
 
 
 \section{Discussion}
@@ -566,53 +639,12 @@ which could go here.  Here are some ideas though:}
 %acknowledgments in the anonymized submission, only in the 
 %final paper. 
 
-\subsubsection*{References}
+\bmcomment{The 'references' heading given by the 
+bibliography command is the wrong size font.  Needs to
+be the size of a 'third level heading'.  How to change this?}
 
-\bmcomment{See comments in source for partial list of references}
+\bibliography{refs}
 
-%
-% TODO: Things about convexity
-%
-% Structured Perceptron
-% Collins, Michael. ``Discriminative training methods for 
-% hidden markov models: Theory and experiments with perceptron algorithms.'' In Proceedings 
-% of the ACL-02 conference on Empirical methods in natural language processing-Volume 10, pp. 1-8. Association for Computational Linguistics, 2002.
-% 
-% Structured SVM
-% Tsochantaridis, Ioannis, Thorsten Joachims, Thomas Hofmann, Yasemin Altun, and Yoram Singer. 
-% ``Large margin methods for structured and interdependent output variables.'' Journal of Machine Learning Research 6, no. 9 (2005).
-%
-% Multiclass SVM
-% Crammer, Koby, and Yoram Singer. 
-% ``On the algorithmic implementation of multiclass kernel-based vector machines.'' The Journal of Machine Learning Research 2 (2002): 265-292.
-%
-% Also Multiclass SVM
-% Weston, Jason, and Chris Watkins. Multi-class support vector machines. Technical Report CSD-TR-98-04, Department of Computer Science, 
-% Royal Holloway, University of London, May, 1998.
-%
-% TODO:20newsgroups 
-% 
-% TODO:Reuters
-%
-% SGD algorithm implementation/learning rate
-% Shalev-Shwartz, Shai, Yoram Singer, Nathan Srebro, and Andrew Cotter. 
-% ``Pegasos: Primal estimated sub-gradient solver for svm.'' Mathematical programming 127, no. 1 (2011): 3-30.
-%
-% Inspiration for objective function (select cost weights to turn on)
-% Kumar, M. Pawan, Benjamin Packer, and Daphne Koller. ``Self-Paced Learning for Latent Variable Models.'' In NIPS, vol. 1, p. 3. 2010.
-%
-% Curriculum Learning
-% Bengio, Yoshua, JÃ©rÃŽme Louradour, Ronan Collobert, and Jason Weston
-%. ``Curriculum learning.'' In Proceedings of the 26th annual international conference on machine learning, pp. 41-48. ACM, 2009.
-%
-% Confident weighted learning
-% Dredze, Mark, Koby Crammer, and Fernando Pereira. ``Confidence-weighted linear classification.'' In Proceedings 
-% of the 25th international conference on Machine learning, pp. 264-271. ACM, 2008.
-%
-% Some other things from http://www.cs.cmu.edu/~nasmith/papers/career-proposal-2010.pdf 
-%   - Hidden variable learning by state splitting?
-%   - Finite state output encodings
-%
 % Here's how things are formatted in the NIPS template:
 %
 %

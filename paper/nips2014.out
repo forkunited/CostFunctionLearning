@@ -6,8 +6,8 @@
 \BOOKMARK [2][-]{subsection.3.3}{Some 'easiness' normalization constants}{section.3}% 6
 \BOOKMARK [1][-]{section.4}{Experiments}{}% 7
 \BOOKMARK [2][-]{subsection.4.1}{Datasets}{section.4}% 8
-\BOOKMARK [3][-]{subsubsection.4.1.1}{20 newsgroups}{subsection.4.1}% 9
-\BOOKMARK [3][-]{subsubsection.4.1.2}{Reuter 21578 \(R52\)}{subsection.4.1}% 10
+\BOOKMARK [3][-]{subsubsection.4.1.1}{Reuters 21578 \(R52\)}{subsection.4.1}% 9
+\BOOKMARK [3][-]{subsubsection.4.1.2}{20 newsgroups}{subsection.4.1}% 10
 \BOOKMARK [2][-]{subsection.4.2}{Results}{section.4}% 11
 \BOOKMARK [1][-]{section.5}{Discussion}{}% 12
 \BOOKMARK [2][-]{subsection.5.1}{Related literature}{section.5}% 13
