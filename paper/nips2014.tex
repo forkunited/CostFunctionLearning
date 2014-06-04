@@ -376,7 +376,9 @@ Otherwise, if the solution is at a non-differentiable point, then
 $\mathcal{\hat{E}}_S$ has a value that approximates equation \ref{easiness}
 in a sensible way.  
 
-\bmcomment{Fill in details about non-differentiable solutions}
+\bmcomment{Fill in details about non-differentiable solutions. I'm thinking
+we can put in detail about this if there's space, but otherwise just mention
+it quickly?}
 
 \subsection{Some 'easiness' normalization constants}
 
@@ -583,10 +585,6 @@ $\mathcal{S}_{[\mathcal{Y}]^2}$ prediction
 classes, possibly because the \textbf{Expected} normalizers tend 
 to under-estimate.
 
-
-%- Learned cost weights for each model, relation to hierarchies
-% - Measured accuracies on hierarchy
-
 \begin{table}[t]
 \caption{Micro-averaged Accuracies}
 \label{accuraciesTable}
@@ -604,6 +602,37 @@ SVMCLN      & Expected          & $[\mathcal{Y}]^2$  & 0.8307      & 0.8558     
 \end{tabular}
 \end{center}
 \end{table}
+
+The hierarchical structure of the 20 Newsgroups topics encodes a notion
+of distance between topics as distance within the hierarchy.  The fifth
+and sixth columns of Table~\ref{accuraciesTable} show the accuracies 
+computed when nearby topics in the hierarchy are are collapsed into
+single topics--the fifth column shows the accuracies computed when all
+topics that are the same to two levels deep in the hierarchy are collapsed
+into a single topic, and the sixth column shows the accuracies computed
+when all topics that are the same at the first level of the hierarchy are
+collapsed into a single topic.  
+
+\bmcomment{I think there are ways to make the following result clearer
+if we compute other numbers... but I don't know if we have time for that.
+This may be a bit confusing I think though}
+
+The cost learning should learn a notion of distance between topics 
+approximated by the cost function, and we expect this notion of distance
+to approximate the notion of distance encoded by the hierarchy.  The 
+approximated notion of distance encoded in the cost function should 
+cause SVMCLN to improve at distinguishing topics that are far apart
+from each other by the notion of distance approximated by the cost 
+function.  So if SVMCLN's learned distances approximate the distances
+through the hierarchy, then we should expect the SVMCLN's collapsed 
+accuracy improvements to be nearly as great as the uncollapsed accuracy
+improvements.  This is shown by the [FILL] accuracy improvements in the
+fourth, fifth, and sixth columns of Table~\ref{accuraciesTable} by
+the \textbf{Logical} $\mathcal{S}_{[\mathcal{Y}]^2}$ version of SVMCLN.
+
+\bmcomment{Fix the above paragraph when get new numbers}
+
+% Learned hierarchy
 
 %\begin{tikzpicture}
 %\tikzset{grow'=right,level distance=32pt}
