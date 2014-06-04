@@ -541,17 +541,37 @@ likely decreases with their relatedness.
 
 \bmcomment{All 20news table numbers are wrong.  Need to fix them after experiments rerun.}
 
-Table~\ref{accuraciesTable} shows the... 
+Table~\ref{accuraciesTable} shows the micro-averaged accuracies on the Reuters
+and 20 newsgroups tasks for the SVM baseline model and versions of SVMCLN with
+different choices of normalization constants $\mathbf{n}$ and incorrect prediction
+classes $\mathcal{S}$.  None of the SVMCLN variations improve the accuracy over
+the SVM on the Reuters task, but inspection of the confusion matrix for the SVM
+baseline provides some intuition for this lack of improvement.  The matrix shows
+that $53\%$ of the SVM's mistakes were on examples with whose topics had 10 or
+fewer test examples, all off which were predicted incorrectly.  Furthermore,
+there is no non-diagonal element in the confusion matrix with more than 10 
+mistakes.  These observations suggest that many of the SVM baseline's mistakes
+come from infrequent labels rather than systematic conflations between certain
+label pairs, and further that all of the incorrect prediction classes in the
+cost learning model will be extremely small to begin with.  As a result, it's
+unlikely that SVMCLN would be able to re-scale the costs to greatly shrink
+any incorrect prediction classes.  In hindsight, this provides a good example
+of a good example of how analysis of the errors made by the standard SVM can
+determine whether cost learning will be beneficial.
+
+In contrast, every SVMCLN variation appears to give significantly improved accuracy 
+over the SVM on the 20 Newsgroups data.  
+
 
 %- Performance
 %	- SVM baseline and cost learning
-%   - Last column shows that cost learning did not help on reuters
-%   	- 
 %	- Unordered performs at least as well as ordered
 %	- Logical and expected n perform better than no normalization
 %     - This is what we expected since no normalization won't properly learn costs
 %
 %- Learned cost weights for each model, relation to hierarchies
+
+% - Measured accuracies on hierarchy
 
 \begin{table}[t]
 \caption{Micro-averaged Accuracies}
