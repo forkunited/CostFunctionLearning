@@ -368,17 +368,24 @@ should be non-zero (or correspondingly which $S$ are not
 impossibly difficult), and use the $\|\mathcal{\hat{E}}\|^2_\mathbf{n}$ 
 to limit the magnitude of $\mathcal{\hat{E}}_S$.
 
-If the solution to objective \ref{costObjective} is at point that is 
+If the solution to Objective~\ref{costObjective} is at point that is 
 differentiable with respect to $\mathcal{\hat{E}}_S$, then it's easy to 
 show that $\mathcal{\hat{E}}_S$ has exactly the value given by 
-equation \ref{easiness}.
+Equation~\ref{easiness}.
 Otherwise, if the solution is at a non-differentiable point, then 
-$\mathcal{\hat{E}}_S$ has a value that approximates equation \ref{easiness}
-in a sensible way.  
+$\mathcal{\hat{E}}_S$ has a value that approximates Equation~\ref{easiness} in a sensible way.  Specifically, the non-differentiable points of Objective~\ref{costObjective}
+occur due to ties between multiple sequences of labels for the 
+minimum value solution, and each of these equally good label sequences has 
+differently sized incorrect prediction classes, giving different
+values of 'easiness' for each class according to Equation~\ref{easiness}.
+The values of $\mathcal{\hat{E}}_S$ at the non-differentiable
+points are between the values given by Equation~\ref{easiness}
+for each tied best label sequence.
 
-\bmcomment{Fill in details about non-differentiable solutions. I'm thinking
-we can put in detail about this if there's space, but otherwise just mention
-it quickly?}
+\bmcomment{Is this non-differentiable part understandable?  Is it enough,
+or do I need to give the proof?  I still haven't actually gone through
+the proof completely, so maybe we should at least go over the reasoning
+to make sure I'm not crazy.}
 
 \subsection{Some 'easiness' normalization constants}
 
@@ -708,7 +715,8 @@ which could go here.  Here are some ideas though:}
 
 \bmcomment{Relationship between model 'difficulty' and 'task' difficulty}
 
-\bmcomment{Characterize properties of data/features that determine whether cost learning is useful}
+\bmcomment{Characterize properties of data/features that determine 
+whether cost learning is useful}
 
 %\subsubsection*{Acknowledgments}
 
