@@ -18,12 +18,15 @@
 \DeclareMathOperator*{\argmax}{argmax}
 \DeclareMathOperator*{\argmin}{argmin}
 
+\newcommand{\unorderedS}{\mathcal{S}^{\mathrm{u}}}
+\newcommand{\orderedS}{\mathcal{S}^{\mathrm{o}}}
+
 \newcommand{\bmcomment}[1]{\textcolor{blue}{\textsc{\textbf{[#1 --bm]}}}}
 \newcommand{\nascomment}[1]{\textcolor{red}{\textsc{\textbf{[#1 --nas]}}}}
 %\documentstyle[nips14submit_09,times,art10]{article} % For LaTeX 2.09
 
 
-\title{Learning when to try hard at learning}
+\title{Learning Not to Try Too Hard}
 
 \author{
 Bill McDowell\thanks{Alternative email: \texttt{forkunited@gmail.com}}
@@ -56,32 +59,46 @@ Pittsburgh, PA 15213 \\
 
 \maketitle
 
-\bmcomment{Probably need a better title.}
 
 \bmcomment{It seems like a lot of other papers refer to 'cost' as 'loss'... 
 Is there somewhere where people call it 'cost' like we are?}
+\nascomment{will address this}
 
 \bmcomment{Noah, I put your name second because your name seems 
 to be last on all of your recent papers.  I don't care which our names is
-first though, so feel free to swap if you want.}
+first though, so feel free to swap if you want.} \nascomment{I usually
+go last}
 
 \begin{abstract}
-\bmcomment{I have trouble writing this part.}
+\nascomment{do last}
 \end{abstract}
 
 \section{Introduction}
 
-\bmcomment{General ideas about cost learning abstracted away
-from the SVM details in the next section...?}
+Discriminative learning algorithms are often motivated by their
+ability to trade off among different kinds of prediction mistakes with
+different costs.  The cost of a mistake is usually taken to be fully
+defined by the task, i.e., human system designers are trusted to
+encode this knowledge prior to learning.  Information about the
+inherent ease of avoiding some errors vs.~others is generally not
+taken into account.   Closely related to this, and critically
+important in domains where the data is constructed by humans, is the
+problem that the outputs in the training data may be unreliable.  For
+example, if two labels are ill-defined by the data-generating process,
+then a learner can be forgiven for conflating them.
 
-\section{Background}
+We consider situations where human intuition about relative costs of
+different errors is insufficient.  In a margin-based linear modeling
+framework, we propose a method for incorporating \textbf{learning of
+  the cost function} alongside learning of the model.  Our approach
+introduces explicit estimates of the ``ease'' of avoiding each type of
+error
+(for a particular model family).   For error types that are ``just too
+hard,'' our model is offered the possibility of giving up in favor of
+making other, less challenging predictions more accurately
 
-\bmcomment{I introduced SVMs through the quadratic programming
-formulation because it seemed easier to summarize margin maximization
-across all the relevant SVM variants that way while staying true to the literature... 
-but maybe I should have just kept it in the form
-of an unconstrained optimization problem for continuity with the rest
-of this paper?}
+
+
 
 \bmcomment{Cite example of unreliable output labels}
 
@@ -91,189 +108,126 @@ cost functions are used in structured domains}
 
 \bmcomment{Mention examples of measures of 'difficulty'? Cite.}
 
-For the multiclass classification problem, we are given a set of
-$m$ labelled training data instances
-$D=\{(\mathbf{x}_1,\mathbf{y}_1),\hdots,(\mathbf{x}_m, \mathbf{y}_m)\}\subset\mathcal{X}\times\mathcal{Y}$ 
-where each example $\mathbf{x}_i$ is assigned label 
-$\mathbf{y}_i$, and we want to learn a function 
-$f:\mathcal{X}\rightarrow\mathcal{Y}$ which gives the correct
-label for any input taken from $\mathcal{X}$.\footnote{
-We borrow heavily from the notation used in \citep{tsochantaridis2004support}.
-}  Past work has developed
-a multiclass support vector machine (SVM) which generalizes the 
-concept of margin maximization employed by classical SVMs for binary
-classification tasks
-\citep{vapnik1998statistical}\citep{crammer2002algorithmic}\citep{weston1998multi}. 
 
-In particular, assuming that
-$\mathbf{g}:\mathcal{X}\times\mathcal{Y}\rightarrow \mathbb{R}^k$ 
-computes a featurized representation of an input-output pair, the 
-multiclass SVM gives a score to a labelled instance $(\mathbf{x},\mathbf{y})$ 
-as:
 
+Our experiments show benefits on standard benchmarks
+\nascomment{change if only one} in text classification.
+
+
+\section{Background and Notation}
+
+In a prediction problem, let $\mathcal{X}$ denote the input space,
+$\mathcal{Y}$ denote the output space, and assume $N$ training
+instances $\{(x_1, y_1), \ldots, (x_N, y_N)\}$.  We assume a linear
+model and prediction function:
 \begin{equation}
-\label{score}
-F(\mathbf{x},\mathbf{y};\mathbf{w})= \mathbf{w}^\top \mathbf{g}(\mathbf{x},\mathbf{y})
+\hat{y} = \argmax_{y \in \mathcal{Y}} \left(f(x, y;\mathbf{w}) \triangleq \mathbf{w}^\top \mathbf{g}(x, y) \right)
 \end{equation}
+where $\mathbf{w} \in \mathbb{R}^D$ are the parameters to be learned
+and $\mathbf{g} : \mathcal{X} \times \mathcal{Y} \rightarrow
+\mathbb{R}^D$ is the feature vector function.  We will let
+$\mathcal{M} =\{f(\cdot,\cdot;\mathbf{w}) \mid \mathbf{w} \in
+\mathbb{R}^D\}$ denote the model family under consideration, given a
+fixed choice of $\mathbf{g}$.
 
-And makes predictions according to:
+Our approach, which assumes $\mathcal{Y}$ is categorical, is based on
+the soft margin formulation of multiclass support vector machines
+\citep{vapnik1998statistical,crammer2002algorithmic,weston1998multi}.
+Tsochantaridis et al.~\citep{tsochantaridis2004support} and Taskar et
+al.~\ref{koller2003max} generalized this framework to allow for
+differences in costs between different kinds of mistakes, as found
+when $\mathcal{Y}$ is structured.  Let the cost function
+$\Delta:\mathcal{Y}\times\mathcal{Y}\rightarrow\mathbb{R}$  be such
+that $\Delta(y, y')$ is the cost of predicting $y$ when the correct
+label is $y'$.  We use the ``margin rescaling'' variant the multiclass SVM:
+\begin{align}
+ \min_{\boldsymbol{\xi}\geq 0, \mathbf{w}}
+\frac{\lambda}{2}\|\mathbf{w}\|_2^2+\frac{1}{m}\sum_{i=1}^m\xi_i 
+ \text{\ \ \ s.t.\ \ \ } \forall i,  \forall y \in \mathcal{Y} \setminus
+ \{y_i\},  f(x_i, y_i; \mathbf{w}) - f(x, y, \mathbf{w}) \geq
+ \Delta(y, y_i) - \xi_i \label{marginRescaling}
+\end{align}
+This objective seeks $\mathbf{w}$ that minimizes misclassifications while
+maximizing the margin between correct and incorrect instances.
+Further, the more incorrect an $(x,y)$ pair is, the greater the margin
+should be.
 
+Previous work assumes $\Delta$ follows intuitively from the prediction
+task.  For example, in natural language dependency parsing, the number
+of words attached to the wrong parent (Hamming distance for the parse
+tree) is a sensible choice.  
+
+We propose to parameterize $\Delta$ and
+learn its parameters jointly with $\mathbf{w}$.  This learned cost
+function should encode distances between outputs from the perspective
+of the ease with which a model in the family $\mathcal{M}$
+can distinguish between them.
+This joint learning setup is expected to be particularly useful when
+some classes of errors are difficult or impossible for a model in the
+class to resolve, due to unreliable annotations or an insufficient
+choice of features $\mathbf{g}$.
+
+We let $\mathcal{S} \subseteq 2^{\mathcal{Y}\times\mathcal{Y}}$ be a
+collection of prediction error classes that exhausts $\mathcal{Y}^2$ (i.e., $\bigcup_{S \in
+  \mathcal{S}} S = \mathcal{Y}^2$); the error classes need not be
+mutually exclusive.  We let $e_{S} \in \mathbb{R}$ denote an estimate
+of the ``ease'' with which any model in the linear family (given by
+$\mathbf{g}$) can learn to avoid errors in class $S$.  Then we let:
 \begin{equation}
-\label{prediction}
-\hat{f}(\mathbf{x};\mathbf{w})=\argmax_{\mathbf{y}'\in\mathcal{Y}} F(\mathbf{x},\mathbf{y}';\mathbf{w})
+\Delta(y, y') = \sum_{S \in \mathcal{S}: (y, y') \in S} e_S =
+\mathbf{e}^\top \mathbf{s}(y, y')
 \end{equation}
+where $\mathbf{e}$ is a vector of the $e_S$ and $\mathbf{s}$ is a
+binary vector of length $\mathcal{S}$ indicating which error class(es)
+each possible confusion belongs to.
 
-Where the feature weights $\mathbf{w}$ are given by the
-solution to the following soft-margin maximizing quadratic program:
+In this paper, we consider two prediction error classes, corresponding
+to unordered and ordered pairs of outputs.  We denote them
+$\unorderedS$ and $\orderedS$, respectively.
 
-\begin{equation}
-\begin{split}
-& \min_{\mathbf{\xi}\geq 0, \mathbf{w}}\big(\frac{\lambda_2}{2}\|\mathbf{w}\|_2^2+\frac{1}{m}\sum_{i=1}^m\xi_i\big) \\
-& \text{s.t.     } \forall i : \forall \mathbf{y}\in\mathcal{Y}\backslash\mathbf{y}_i : F(\mathbf{x}_i,\mathbf{y}_i;\mathbf{w})-F(\mathbf{x}_i,\mathbf{y};\mathbf{w})\geq 1-\xi_i
-\end{split}
-\end{equation}
+% There are many possible choices for prediction classes $\mathcal{S}$, but
+% in this paper, we focus on the following two:
 
-This quadratic program chooses weights that minimize
-the number of misclassified instances while simultaneously
-trying to increase the margin between the scores of 
-correct and incorrect labels, and the $\lambda_2$
-hyper-parameter determines the relative importance of
-these two goals.\footnote{This SVM and all other models in
-this paper can include non-regularized bias terms which
-we omit from our descriptions for readability, but these
-biases were included in the implementations we used for
-our experiments.}
+% \begin{equation}
+% \begin{split}
+% & \mathcal{S}_{[\mathcal{Y}]^2} = \{ S_{\{\mathbf{y},\mathbf{y}'\}} | \mathbf{y},\mathbf{y}'\in\mathcal{Y}\} \\
+% \text{ where } & S_{\{\mathbf{y},\mathbf{y}'\}}=
+% \{ (\mathbf{y}_1, \mathbf{y}_2) | (\mathbf{y}_1=\mathbf{y}\wedge \mathbf{y}_2=\mathbf{y}')\vee(\mathbf{y}_1=\mathbf{y}'\wedge \mathbf{y}_2=\mathbf{y}) \} \\
+% \end{split}
+% \end{equation}
 
-Tsochantaridis et al. and Taskar et al. further generalized 
-the margin maximization
-to make sense for domains where some prediction mistakes are more 
-costly than others (especially domains where $\mathcal{Y}$ contains
-a large number of structured outputs) 
-\citep{tsochantaridis2004support}\citep{koller2003max}.  
-They introduce a function 
-$\Delta:\mathcal{Y}\times\mathcal{Y}\rightarrow\mathbb{R}$ that
-determines the cost
-$\Delta(\mathbf{y},\mathbf{\hat{y}})$ of predicting label 
-$\mathbf{\hat{y}}$ when the correct label is $\mathbf{y}$.  
-The $\Delta(\mathbf{y},\mathbf{\hat{y}})$ is larger for more 
-inaccurate $\mathbf{\hat{y}}$ predictions, and 
-$\Delta(\mathbf{y},\mathbf{y})=0$ giving no cost for a correct
-prediction. This cost function is incorporated
-into the SVM learning by modifying the 
-multiclass SVM quadratic
-program through 'margin re-scaling' as:\footnote{Tsiochantaridis et al. 
-also introduce an alternative 'slack re-scaling' technique, but the 
-present paper mainly builds off of the 'margin re-scaling' approach.}
+% \begin{equation}
+% \mathcal{S}_{\mathcal{Y}^2} = \{ S_{(\mathbf{y},\mathbf{y}')} | \mathbf{y},\mathbf{y}'\in\mathcal{Y}\}\text{ where }S_{(\mathbf{y},\mathbf{y}')}=\{ (\mathbf{y},\mathbf{y}') \} \\
+% \end{equation}
 
-\begin{equation}
-\label{marginRescaling}
-\begin{split}
-& \min_{\mathbf{\xi}\geq 0, \mathbf{w}}\big(\frac{\lambda_2}{2}\|\mathbf{w}\|_2^2+\frac{1}{m}\sum_{i=1}^m\xi_i\big) \\
-& \text{s.t.     } \forall i : \forall \mathbf{y}\in\mathcal{Y}\backslash\mathbf{y}_i : F(\mathbf{x}_i,\mathbf{y}_i;\mathbf{w})-F(\mathbf{x}_i,\mathbf{y};\mathbf{w})\geq \Delta(\mathbf{y}_i,\mathbf{y})-\xi_i
-\end{split}
-\end{equation}
+% $\mathcal{S}_{[\mathcal{Y}]^2}$ contains a prediction class for every
+% unordered pair of labels, and $\mathcal{S}_{\mathcal{Y}^2}$ contains
+% a prediction class for every ordered pair.  We might choose 
+% $\mathcal{S}_{[\mathcal{Y}]^2}$ when factoring the cost function if
+% we believe it is equally easy to resolve misclassifications of 
+% $\mathbf{y}$ as $\mathbf{y}'$ and misclassifications of $\mathbf{y}'$
+% as $\mathbf{y}$.  Otherwise, if we suspect these two incorrect 
+% prediction types to differ in easiness, then we might choose 
+% $\mathcal{S}_{\mathcal{Y}^2}$.
 
-Intuitively, this margin re-scaling quadratic program allows 
-the model to choose margins between between scores of 
-$\mathbf{y}_i$ and $\mathbf{\hat{y}}_i$  proportional to
-the prediction cost $\Delta(\mathbf{y}_i,\mathbf{\hat{y}})$.
-This choice biases the model toward making low cost 
-predictions over high cost predictions.
-
-Whereas previous work assumes that we hand-select 
-domain-specific cost functions that seem like 
-good measures of the distances between labels, we
-propose learning this function from the data jointly with
-the prediction function $f$.  Similarly to the hand-selected
-cost functions, the learned cost functions
-should reflect some notion of the distance between two
-labels, but as seen from the perspective of the model and its
-features rather than from the perspective of the person 
-engineering the model. In other words, the value of 
-$\Delta(\mathbf{y}, \mathbf{\hat{y}})$ should
-be proportional to the ease with which the model  
-discriminates between $\mathbf{y}$ and $\mathbf{\hat{y}}$
-given its features.  This choice of cost gives the model the
-freedom to shift its weights so that there are wider margins
-between labels which it can easily discriminate, and smaller
-margins between labels which it has difficulty discriminating.
-Such a policy is particularly useful when there are classes
-of incorrect predictions that are difficult or impossible for 
-the model to systematically resolve due to unreliably 
-annotated output labels or a 
-choice of features that is insufficient for the task.
-
-There are several ways that we might quantify 
-the ease with which the model discriminates between two labels,
-but for now, we will keep the notion of 'easiness' fuzzy while
-establishing its relation to the cost function.
-We propose that an incorrect prediction 
-$\mathbf{\hat{y}}$ where the actual label is $\mathbf{y}$ can 
-fall into some number of 'incorrect prediction classes', and
-the overall cost of the incorrect prediction is the sum over the
-easiness of resolving (shrinking) each of these classes.  More
-formally, let $\mathcal{S}\subseteq 2^{\mathcal{Y}^2}$ be a 
-collection of incorrect prediction classes that collectively 
-exhausts $\mathcal{Y}^2$.  Assume that the 'easiness' with 
-which a model of type $\mathcal{M}$ (e.g. SVM) given features 
-$\mathbf{g}$ and data $D$ resolves incorrect prediction 
-class $S\in\mathcal{S}$ is given by 
-$\mathcal{E}(S,\mathcal{M},\mathbf{g},D)\in\mathbb{R}$.
-Then, we assume that the cost is given by:
-
-\begin{equation}
-\Delta(\mathbf{y},\mathbf{\hat{y}})=\sum_{S\in\mathcal{S}}\mathcal{E}(S,\mathcal{M},\mathbf{g}, D)\mathbbm{1}((\mathbf{y},\mathbf{\hat{y}})\in S)=
-\mathbf{\mathcal{E}}^\top \mathbf{\mathcal{S}}(\mathbf{y},\mathbf{\hat{y}})
-\end{equation}
-
-There are many possible choices for prediction classes $\mathcal{S}$, but
-in this paper, we focus on the following two:
-
-\begin{equation}
-\begin{split}
-& \mathcal{S}_{[\mathcal{Y}]^2} = \{ S_{\{\mathbf{y},\mathbf{y}'\}} | \mathbf{y},\mathbf{y}'\in\mathcal{Y}\} \\
-\text{ where } & S_{\{\mathbf{y},\mathbf{y}'\}}=
-\{ (\mathbf{y}_1, \mathbf{y}_2) | (\mathbf{y}_1=\mathbf{y}\wedge \mathbf{y}_2=\mathbf{y}')\vee(\mathbf{y}_1=\mathbf{y}'\wedge \mathbf{y}_2=\mathbf{y}) \} \\
-\end{split}
-\end{equation}
-
-\begin{equation}
-\mathcal{S}_{\mathcal{Y}^2} = \{ S_{(\mathbf{y},\mathbf{y}')} | \mathbf{y},\mathbf{y}'\in\mathcal{Y}\}\text{ where }S_{(\mathbf{y},\mathbf{y}')}=\{ (\mathbf{y},\mathbf{y}') \} \\
-\end{equation}
-
-$\mathcal{S}_{[\mathcal{Y}]^2}$ contains a prediction class for every
-unordered pair of labels, and $\mathcal{S}_{\mathcal{Y}^2}$ contains
-a prediction class for every ordered pair.  We might choose 
-$\mathcal{S}_{[\mathcal{Y}]^2}$ when factoring the cost function if
-we believe it is equally easy to resolve misclassifications of 
-$\mathbf{y}$ as $\mathbf{y}'$ and misclassifications of $\mathbf{y}'$
-as $\mathbf{y}$.  Otherwise, if we suspect these two incorrect 
-prediction types to differ in easiness, then we might choose 
-$\mathcal{S}_{\mathcal{Y}^2}$.
-
-\section{A cost learning model}
+\section{Cost Learning Model}
 \label{costLearningModel}
 
-We desire a model which approximates 
-$\mathcal{E}(S,\mathcal{M},\mathbf{g}, D)$ (for some notion of 
-'easiness') to estimate prediction costs while simultaneous learning 
-feature weights $\mathbf{w}$.   Our proposal follows the intuition 
-that the easiness 
-$\mathcal{E}(S,\mathcal{M},\mathbf{g},D)$ of prediction class $S$ for 
-model class $\mathcal{M}$ is related to the size of the set:
-
+We desire a model that estimates prediction ease $\mathbf{e}$ while
+estimating
+predictive model parameters $\mathbf{w}$.  Above, we defined ``ease''
+with respect to an arbitrary model in the family $\mathcal{M}$, but it
+is more sensible to consider the particular model we seek to
+estimate.  We propose that, for error class $S$ and a model with
+parameters $\mathbf{w}$, ease $e_S$ should be proportional to the rate
+of margin violations involving $S$ that $f(\cdot, \cdot; \mathbf{w})$ makes in the
+training data:
 \begin{equation}
-S_{\mathcal{M},\mathbf{g},D}=\{(\textbf{x}_i,\textbf{y}_i) | (\mathbf{y}_i,\hat{f}^\Delta_{\mathcal{M},\mathbf{g},D}(\mathbf{x}_i;\mathbf{w}_{\mathcal{M},\mathbf{g},D}))\in S\text{ and }(\mathbf{x}_i,\mathbf{y}_i)\in D\}
+\left\{ i  \in \{1,\ldots, D\} \mid \left(y_i, \textstyle \argmax_{y \in \mathcal{Y}} f(x_i, y ; \mathbf{w}) +
+\mathbf{e}^\top \mathbf{s}(y, y_i)\right) \in S\right\}
 \end{equation}
 
-Where $\mathbf{w}_{\mathcal{M},\mathbf{g},D}$ are the learned feature weights,
-and $\hat{f}^\Delta_{\mathcal{M},\mathbf{g},D}$ is the model's prediction
-function augmented with the cost:
-
-\begin{equation}
-\hat{f}^\Delta_{\mathcal{M},\mathbf{g},D}(\mathbf{x}_i;\mathbf{w})=\argmax_{\mathbf{y}\in\mathcal{Y}}\Big( F(\mathbf{x}_i,\mathbf{y};\mathbf{w})
-+\Delta(\mathbf{y}_i,\mathbf{y})\Big)
-\end{equation}
+\nascomment{left off here}
 
 The size of $S_{\mathcal{M},\mathbf{g},D}$ is the number of
 training examples with margin violations in class $S$. If

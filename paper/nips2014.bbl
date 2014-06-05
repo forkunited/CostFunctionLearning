@@ -1,12 +1,5 @@
 \begin{thebibliography}{10}
 
-\bibitem{tsochantaridis2004support}
-Ioannis Tsochantaridis, Thomas Hofmann, Thorsten Joachims, and Yasemin Altun.
-\newblock Support vector machine learning for interdependent and structured
-  output spaces.
-\newblock In {\em Proceedings of the twenty-first international conference on
-  Machine learning}, page 104. ACM, 2004.
-
 \bibitem{vapnik1998statistical}
 Vladimir~N Vapnik.
 \newblock Statistical learning theory (adaptive and learning systems for signal
@@ -22,6 +15,13 @@ Koby Crammer and Yoram Singer.
 Jason Weston and Chris Watkins.
 \newblock Multi-class support vector machines.
 \newblock Technical report, Citeseer, 1998.
+
+\bibitem{tsochantaridis2004support}
+Ioannis Tsochantaridis, Thomas Hofmann, Thorsten Joachims, and Yasemin Altun.
+\newblock Support vector machine learning for interdependent and structured
+  output spaces.
+\newblock In {\em Proceedings of the twenty-first international conference on
+  Machine learning}, page 104. ACM, 2004.
 
 \bibitem{koller2003max}
 Ben Taskar Carlos Guestrin~Daphne Koller.
