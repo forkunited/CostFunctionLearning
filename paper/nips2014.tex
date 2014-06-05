@@ -11,6 +11,7 @@
 \usepackage{natbibspacing}
 
 \usetikzlibrary{arrows}
+\usetikzlibrary{shapes, trees}
 
 \bibliographystyle{unsrt}
 
@@ -655,16 +656,16 @@ Newsgroup hierarchy is shown in figure [FILL].
 
 % Learned hierarchy
 
-%\begin{tikzpicture}
-%\tikzset{grow'=right,level distance=32pt}
-%\tikzset{execute at begin node=\strut}
+\begin{tikzpicture}
+\tikzset{font=\footnotesize}
+\tikzset{anchor=base}
+\tikzset{sibling distance=50pt}
+\tikzset{frontier/.style={distance from root=200}}
+\tikzset{grow=right}
 %\tikzset{every tree node/.style={anchor=base west}}
-%
-%\Tree [
-%[ the ]
-%[ cat ]
-%]
-%\end{tikzpicture}
+\tikzset{edge from parent/.style={draw, edge from parent fork right}}
+\Tree [ [ the cat ] [ the dog ] ]
+\end{tikzpicture}
 %
 %\begin{tikzpicture}[sloped]
 %\node (a) at (-6,0) {a};
