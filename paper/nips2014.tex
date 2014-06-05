@@ -9,6 +9,7 @@
 \usepackage{tikz-qtree}
 \usepackage[sort&compress]{natbib}
 \usepackage{natbibspacing}
+\usepackage{multirow}
 
 \usetikzlibrary{arrows}
 \usetikzlibrary{shapes, trees}
@@ -20,6 +21,7 @@
 
 \newcommand{\unorderedS}{\mathcal{S}^{\mathrm{u}}}
 \newcommand{\orderedS}{\mathcal{S}^{\mathrm{o}}}
+\newcommand{\ourmethod}{NCL}
 
 \newcommand{\bmcomment}[1]{\textcolor{blue}{\textsc{\textbf{[#1 --bm]}}}}
 \newcommand{\nascomment}[1]{\textcolor{red}{\textsc{\textbf{[#1 --nas]}}}}
@@ -84,8 +86,10 @@ inherent ease of avoiding some errors vs.~others is generally not
 taken into account.   Closely related to this, and critically
 important in domains where the data is constructed by humans, is the
 problem that the outputs in the training data may be unreliable.  For
-example, if two labels are ill-defined by the data-generating process,
-then a learner can be forgiven for conflating them.
+example, if training data is produced by asking humans to label
+instances, and two labels are insufficiently well defined for human
+labelers to distinguish them,
+then a learner might be forgiven for conflating them.
 
 We consider situations where human intuition about relative costs of
 different errors is insufficient.  In a margin-based linear modeling
@@ -99,19 +103,16 @@ making other, less challenging predictions more accurately
 
 
 
-
-\bmcomment{Cite example of unreliable output labels}
-
 \bmcomment{Might want to give some motivating examples? Not sure if that's
 necessary or not. One example of multiclass domain, and one example where
-cost functions are used in structured domains}
+cost functions are used in structured domains} 
 
 \bmcomment{Mention examples of measures of 'difficulty'? Cite.}
 
 
 
-Our experiments show benefits on standard benchmarks
-\nascomment{change if only one} in text classification.
+Our experiments with text classification show  scenarios where the method achieves
+performance improvements over a strong baseline.
 
 
 \section{Background and Notation}
@@ -142,7 +143,7 @@ that $\Delta(y, y')$ is the cost of predicting $y$ when the correct
 label is $y'$.  We use the ``margin rescaling'' variant the multiclass SVM:
 \begin{align}
  \min_{\boldsymbol{\xi}\geq 0, \mathbf{w}}
-\frac{\lambda}{2}\|\mathbf{w}\|_2^2+\frac{1}{m}\sum_{i=1}^m\xi_i 
+\frac{\lambda}{2}\|\mathbf{w}\|_2^2+\frac{1}{m}\sum_{i=1}^N\xi_i 
  \text{\ \ \ s.t.\ \ \ } \forall i,  \forall y \in \mathcal{Y} \setminus
  \{y_i\},  f(x_i, y_i; \mathbf{w}) - f(x, y, \mathbf{w}) \geq
  \Delta(y, y_i) - \xi_i \label{marginRescaling}
@@ -150,40 +151,34 @@ label is $y'$.  We use the ``margin rescaling'' variant the multiclass SVM:
 This objective seeks $\mathbf{w}$ that minimizes misclassifications while
 maximizing the margin between correct and incorrect instances.
 Further, the more incorrect an $(x,y)$ pair is, the greater the margin
-should be.
+should be.  This problem is often transformed into an unconstrained
+one corresponding to direct minimization of the regularized average
+hinge loss:
+\begin{equation}
+\label{svmObjective}
+\min_{\mathbf{w}} \frac{\lambda}{2}\|\mathbf{w}\|_2^2 +
+\sum_{i=1}^N  -f(x_i, y_i; \mathbf{w}) + \max_{y \in \mathcal{Y}}
+  f(x_i, y; \mathbf{w} + \Delta(y, y_i)
+\end{equation}
 
-Previous work assumes $\Delta$ follows intuitively from the prediction
-task.  For example, in natural language dependency parsing, the number
-of words attached to the wrong parent (Hamming distance for the parse
-tree) is a sensible choice.  
-
-We propose to parameterize $\Delta$ and
-learn its parameters jointly with $\mathbf{w}$.  This learned cost
-function should encode distances between outputs from the perspective
-of the ease with which a model in the family $\mathcal{M}$
-can distinguish between them.
-This joint learning setup is expected to be particularly useful when
-some classes of errors are difficult or impossible for a model in the
-class to resolve, due to unreliable annotations or an insufficient
-choice of features $\mathbf{g}$.
-
+We introduce some notation for errors.
 We let $\mathcal{S} \subseteq 2^{\mathcal{Y}\times\mathcal{Y}}$ be a
 collection of prediction error classes that exhausts $\mathcal{Y}^2$ (i.e., $\bigcup_{S \in
   \mathcal{S}} S = \mathcal{Y}^2$); the error classes need not be
 mutually exclusive.  We let $e_{S} \in \mathbb{R}$ denote an estimate
-of the ``ease'' with which any model in the linear family (given by
-$\mathbf{g}$) can learn to avoid errors in class $S$.  Then we let:
+of the ``ease'' with which a learner searching in $\mathcal{M}$ 
+can successfully avoid errors in class $S$.  Then we let:
 \begin{equation}
 \Delta(y, y') = \sum_{S \in \mathcal{S}: (y, y') \in S} e_S =
 \mathbf{e}^\top \mathbf{s}(y, y')
 \end{equation}
 where $\mathbf{e}$ is a vector of the $e_S$ and $\mathbf{s}$ is a
 binary vector of length $\mathcal{S}$ indicating which error class(es)
-each possible confusion belongs to.
+each possible confusion in $\mathcal{Y}\times\mathcal{Y}$ belongs to.
 
 In this paper, we consider two prediction error classes, corresponding
 to unordered and ordered pairs of outputs.  We denote them
-$\unorderedS$ and $\orderedS$, respectively.
+$\unorderedS$ and $\orderedS$, respectively.  
 
 % There are many possible choices for prediction classes $\mathcal{S}$, but
 % in this paper, we focus on the following two:
@@ -213,234 +208,207 @@ $\unorderedS$ and $\orderedS$, respectively.
 \section{Cost Learning Model}
 \label{costLearningModel}
 
+
+Previous work assumes $\Delta$ follows intuitively from the prediction
+task.  For example, in natural language dependency parsing, the number
+of words attached to the wrong parent (Hamming distance for the parse
+tree) is a sensible choice.  
+We propose to parameterize $\Delta$ and
+learn its parameters jointly with $\mathbf{w}$.  This learned cost
+function should encode distances between outputs from the perspective
+of the ease with which a model in the family $\mathcal{M}$
+can distinguish between them.
+This joint learning setup is expected to be particularly useful when
+some classes of errors are difficult or impossible for a model in the
+class to resolve, due to unreliable annotations or an insufficient
+choice of features $\mathbf{g}$.
+
+
+\subsection{Ease}
+
 We desire a model that estimates prediction ease $\mathbf{e}$ while
 estimating
-predictive model parameters $\mathbf{w}$.  Above, we defined ``ease''
+predictive model parameters $\mathbf{w}$. 
+We have used the term ``ease''
 with respect to an arbitrary model in the family $\mathcal{M}$, but it
 is more sensible to consider the particular model we seek to
 estimate.  We propose that, for error class $S$ and a model with
-parameters $\mathbf{w}$, ease $e_S$ should be proportional to the rate
+parameters $\mathbf{w}$, ease $e_S$ should be inversely related to the
+number of
 of margin violations involving $S$ that $f(\cdot, \cdot; \mathbf{w})$ makes in the
 training data:
 \begin{equation}
-\left\{ i  \in \{1,\ldots, D\} \mid \left(y_i, \textstyle \argmax_{y \in \mathcal{Y}} f(x_i, y ; \mathbf{w}) +
-\mathbf{e}^\top \mathbf{s}(y, y_i)\right) \in S\right\}
+v_S (\mathbf{w}, \mathbf{e}) \triangleq \left|\left\{ i  \in \{1,\ldots, D\} \mid \left(y_i, \textstyle \argmax_{y \in \mathcal{Y}} f(x_i, y ; \mathbf{w}) +
+\mathbf{e}^\top \mathbf{s}(y, y_i)\right) \in S\right\}\right| \label{eq:set}
 \end{equation}
 
-\nascomment{left off here}
-
-The size of $S_{\mathcal{M},\mathbf{g},D}$ is the number of
-training examples with margin violations in class $S$. If
-the size of this set is large, we might infer that the
-model has trouble shrinking it, and so it's not 'easy'.  This 
-might lead us to conclude that $S_{\mathcal{M},\mathbf{g},D}$ 
-tends to shrink with 'easiness'.  However,
-for many data sets and choices of $\mathcal{S}$, the size 
-of each $S_{\mathcal{M},\mathbf{g},D}$ can be inherently
-biased by the data independently of 'easiness'.  For example, 
-for $S_{\{\mathbf{y},\mathbf{y}'\}}\in\mathcal{S}_{[\mathcal{Y}]^2}$, 
-the size of $S_{\{\mathbf{y},\mathbf{y}'\},\mathcal{M},\mathbf{g},D}$ 
-is biased by the number of examples in the training data which have 
-output labels $\mathbf{y}$ and $\mathbf{y}'$--if there are few 
-training examples of labels 
-$\mathbf{y},\mathbf{y}'\in\mathcal{Y}$, then the size of 
-$S_{\{\mathbf{y}, \mathbf{y}'\},\mathcal{M},\mathbf{g},D}$ 
-will necessarily be small relative to other prediction classes.
-Furthermore, we expect 
-output labels which occur infrequently in the training data to 
-be more difficult for the model to predict correctly, so this
-will lead to the size of 
-$S_{\{\mathbf{y},\mathbf{y}'\},\mathcal{M},\mathbf{g},D}$ 
-increasing with the 'easiness' of 
-$S_{\{\mathbf{y},\mathbf{y}'\}}$ which is opposite the 
-conclusion that that we draw if we think of the size of 
-$S_{\{\mathbf{y},\mathbf{y}'\},\mathcal{M},\mathbf{g},D}$ as
-increasing due to the model's difficulty in shrinking it.  In general, 
-this suggests that if we want the size of $S_{\mathcal{M},\mathbf{g},D}$
-to vary with easiness, we need to normalize it to account for 
-properties of the training data that introduce irrelevant
-biases.  
-
-\subsection{A measure of 'easiness'}
-
-\bmcomment{Might want to discuss other possibilities, or generally
-refer to other possibilities in future work}
-
-The above observations suggest the following as a possible 
-measure of 'easiness':
-
+The intuition is that, when this set is large, it is because it is not easy for the
+model to shrink.  Of course, we should also take into account 
+that the distribution of the data may make some errors more frequent,
+inflating the size of the set in Eq.~\ref{eq:set} even if $S$ is ``easy.''
+Further,  \emph{infrequently} observed labels are generally
+expected to be harder to predict.  Yet for an $S$ that includes errors on
+a  rarely occurring class, the set in Eq.~\ref{eq:set} will
+necessarily be small, regardless of how easy it is.
+We therefore propose the following condition for $e_S$:
 \begin{equation}
-\label{easiness}
-\mathcal{E}(S,\mathcal{M},\mathbf{g},D)=\max\bigg(0, 1-\frac{|S_{\mathcal{M},\mathbf{g},D}|}{n_{S,\mathcal{M},\mathbf{g},D}}\bigg)
+e_S = \max\left( 0, 1 - \frac{v_S(\mathbf{w}, \mathbf{e}) }{n_S}\right) \label{e-condition}
 \end{equation}
+where $n_S$ is a fixed, \emph{a priori} upper bound on the count of
+$S$ errors, $v_S$.   This
+has the desirable property that  if $v_S \ge n_S$,  i.e., $S$ is too
+difficult to shrink, then ease $e_S$ goes to zero and the model is
+allowed to give up on $S$.  It also keeps $e_S \in [0,1]$, giving it
+an intuitive interpretation that undifferentiated errors (i.e., $\mathbf{e}=\boldsymbol{1}$).
 
-Where $n_{S,\mathcal{M},\mathbf{g},D}$ is a normalization constant which
-gives the maximum possible value we expect for the size of 
-$S_{\mathcal{M},\mathbf{g},D}$, accounting for irrelevant biases
-introduced by the data as discussed above.  This measure of easiness 
-is in $[0,1]$, and it has the property that if 
-$|S_{\mathcal{M},\mathbf{g},D}|\geq n_{S,\mathcal{M},\mathbf{g},D}$,
-then $\mathcal{E}(S,\mathcal{M},\mathbf{g},D)=0$, indicating that
-$S_{\mathcal{M},\mathbf{g},D}$ is so difficult to shrink that its
-size is greater than our expected upper bound.
 
-\subsection{A cost learning objective}
 
-\bmcomment{Cite self-paced learning for inspiration for new objective function?}
+% The size of $S_{\mathcal{M},\mathbf{g},D}$ is the number of
+% training examples with margin violations in class $S$. If
+% the size of this set is large, we might infer that the
+% model has trouble shrinking it, and so it's not 'easy'.  This 
+% might lead us to conclude that $S_{\mathcal{M},\mathbf{g},D}$ 
+% tends to shrink with 'easiness'.  However,
+% for many data sets and choices of $\mathcal{S}$, the size 
+% of each $S_{\mathcal{M},\mathbf{g},D}$ can be inherently
+% biased by the data independently of 'easiness'.  For example, 
+% for $S_{\{\mathbf{y},\mathbf{y}'\}}\in\mathcal{S}_{[\mathcal{Y}]^2}$, 
+% the size of $S_{\{\mathbf{y},\mathbf{y}'\},\mathcal{M},\mathbf{g},D}$ 
+% is biased by the number of examples in the training data which have 
+% output labels $\mathbf{y}$ and $\mathbf{y}'$--if there are few 
+% training examples of labels 
+% $\mathbf{y},\mathbf{y}'\in\mathcal{Y}$, then the size of 
+% $S_{\{\mathbf{y}, \mathbf{y}'\},\mathcal{M},\mathbf{g},D}$ 
+% will necessarily be small relative to other prediction classes.
+% Furthermore, we expect 
+% output labels which occur infrequently in the training data to 
+% be more difficult for the model to predict correctly, so this
+% will lead to the size of 
+% $S_{\{\mathbf{y},\mathbf{y}'\},\mathcal{M},\mathbf{g},D}$ 
+% increasing with the 'easiness' of 
+% $S_{\{\mathbf{y},\mathbf{y}'\}}$ which is opposite the 
+% conclusion that that we draw if we think of the size of 
+% $S_{\{\mathbf{y},\mathbf{y}'\},\mathcal{M},\mathbf{g},D}$ as
+% increasing due to the model's difficulty in shrinking it.  In general, 
+% this suggests that if we want the size of $S_{\mathcal{M},\mathbf{g},D}$
+% to vary with easiness, we need to normalize it to account for 
+% properties of the training data that introduce irrelevant
+% biases.  
 
-\bmcomment{Add footnote about relationship between norm in objective and
-Mahalanobis norm}
+\subsection{Objective}
 
-\bmcomment{Is there any math I should be more explicit about?}
-
-We can modify the margin re-scaling SVM learning procedure given by 
-Quadratic Program~\ref{marginRescaling} to learn the cost function 
-according to the easiness measure shown in Equation~\ref{easiness}.
-First, we transform the quadratic program
-into the equivalent unconstrained optimization problem:
-
-\begin{equation}
-\label{svmObjective}
-\min_{\mathbf{w}} \frac{\lambda_2}{2}\|\mathbf{w}\|_2^2 + \sum_{i=1}^m\bigg(-F(\mathbf{x}_i,\mathbf{y}_i;\mathbf{w})+\max_{\mathbf{y}\in \mathcal{Y}}\Big(F(\mathbf{x}_i,\mathbf{y};\mathbf{w})+\Delta(\mathbf{y}_i,\mathbf{y})\Big)\bigg)
-\end{equation}
-
-And we modify this function to include the cost learning as:
-
+Our approach is a modification to the SVM objective in
+Eq.~\ref{svmObjective}; it is a joint optimization of $\mathbf{w}$ and $\mathbf{e}$:
 \begin{equation}
 \label{costObjective}
-\min_{\mathbf{\mathcal{\hat{E}}}\geq 0,\mathbf{w}} \frac{\lambda_2}{2}\|\mathbf{w}\|_2^2 + \sum_{i=1}^m\bigg(-F(\mathbf{x}_i,\mathbf{y}_i;\mathbf{w})+\max_{\mathbf{y}\in \mathcal{Y}}\Big(F(\mathbf{x}_i,\mathbf{y};\mathbf{w})+\mathbf{\mathcal{\hat{E}}}^\top \mathbf{\mathcal{S}}(\mathbf{y}_i,\mathbf{y})\Big)\bigg)-\mathbf{\mathcal{\hat{E}}}^\top\mathbf{n}+\frac{1}{2}\|\mathbf{\mathcal{\hat{E}}}\|^2_\mathbf{n}
+\min_{\mathbf{e}\geq 0,\mathbf{w}} \frac{\lambda}{2}\|\mathbf{w}\|_2^2
++ \frac{1}{2} \|\mathbf{e}\|_{\mathbf{n}}^2 - \mathbf{e}^\top
+\mathbf{n} + \sum_{i=1}^N -f(x_i,y_i; \mathbf{w})  + \max_{y \in
+  \mathcal{Y}} f(x_i,y ; \mathbf{w}) + \mathbf{e}^\top \mathbf{s}(y, y_i)
 \end{equation}
+where $\mathbf{n}$ is the vector of upper bounds on prediction error
+frequencies and $\|\mathbf{e}\|_{\mathbf{n}}^2 = \sum_{S \in
+  \mathcal{S}} n_Se_S^2$.  The changes amount to (1) including
+$\mathbf{e}$ as a free variable and (2) regualrizing it with a quadratic
+penalty (second term in Eq.~\ref{costObjective}) and a linear penalty
+(third term in Eq.~\ref{costObjective}).  The linear penalty selects
+which $e_S$ should be nonzero---equivalently, are not impossibly
+difficult.  Setting $e_S = 0$ amounts to giving up on $S$ errors.
 
-Where $\mathbf{n}$ is the vector of normalization constants, and 
-$\|\mathbf{\mathcal{\hat{E}}}\|^2_n=\sum_{S\in\mathcal{S}}n_S\mathcal{\hat{E}}_S^2$.\footnote{
-  We abbreviate $\mathcal{\hat{E}}(S,\mathcal{M},\mathbf{g},D)$ and 
- $n_{S,\mathcal{M},\mathbf{g},D}$ as $\mathcal{\hat{E}}_S$ and $n_S$ for 
- readability.
-}
-The idea for this new objective function is to use the 
-$-\mathbf{\mathcal{\hat{E}}}^\top\mathbf{n}$ term to select which 
-$\mathcal{\hat{E}}_S$
-should be non-zero (or correspondingly which $S$ are not 
-impossibly difficult), and use the $\|\mathcal{\hat{E}}\|^2_\mathbf{n}$ 
-to limit the magnitude of $\mathcal{\hat{E}}_S$.
 
-If the solution to Objective~\ref{costObjective} is at point that is 
-differentiable with respect to $\mathcal{\hat{E}}_S$, then it's easy to 
-show that $\mathcal{\hat{E}}_S$ has exactly the value given by 
-Equation~\ref{easiness}.
-Otherwise, if the solution is at a non-differentiable point, then 
-$\mathcal{\hat{E}}_S$ has a value that approximates Equation~\ref{easiness} in a sensible way.  Specifically, the non-differentiable points of Objective~\ref{costObjective}
-occur due to ties between multiple sequences of labels for the 
-minimum value solution, and each of these equally good label sequences has 
-differently sized incorrect prediction classes, giving different
-values of 'easiness' for each class according to Equation~\ref{easiness}.
-The values of $\mathcal{\hat{E}}_S$ at the non-differentiable
-points are between the values given by Equation~\ref{easiness}
-for each tied best label sequence.
+\bmcomment{Cite self-paced learning for inspiration for new objective
+  function?} \nascomment{not sure}
+
+\bmcomment{Add footnote about relationship between norm in objective and
+Mahalanobis norm} \nascomment{not sure this is critical}
+
+At points of the objective in Eq.~\ref{costObjective} that are differentiable with respect to $e_S$, then it is
+straightforward to show that Eq.~\ref{e-condition} holds.  At
+non-differentiable points, which occur due to ties among $y$, $e_S$ will lie
+between the values given by Eq.~\ref{e-condition} for these tied $y$.
 
 \bmcomment{Is this non-differentiable part understandable?  Is it enough,
 or do I need to give the proof?  I still haven't actually gone through
 the proof completely, so maybe we should at least go over the reasoning
-to make sure I'm not crazy.}
+to make sure I'm not crazy.} \nascomment{I think we should add the
+proof.  the paper is short, so there is room, at least right now.
+might be okay just to give the proof for differentiable case.}
 
-\subsection{Some 'easiness' normalization constants}
 
-\bmcomment{Mention choosing n using baseline 
-SVM especially if this is included in results.  But otherwise
-maybe put it in future work since choosing n based on other
-models is a general topic to explore}
+\subsection{Constants $\mathbf{n}$}
 
 The appropriate choice for the normalization vector $\mathbf{n}$ in 
-Objective~\ref{costObjective} depends on the prediction classes
-$\mathcal{S}$ and the type of irrelevant bias we are trying to
-remove from 'easiness' measure. For $\mathcal{S}_{[\mathcal{Y}]^2}$
-and $\mathcal{S}_{\mathcal{Y}^2}$, we want to remove the bias introduced
-into the size of the prediction classes by non-uniform label 
-distributions, as discussed at the beginning of 
-Section~\ref{costLearningModel}.  Otherwise, the model will 
-tend to over-estimate
-the costs of incorrect predictions involving labels that occur 
-infrequently in the training data.  The following are two 
-plausible choices of $\mathbf{n}$ to achieve this goal. In each,
-assume that $D_\mathbf{y}$ is the set of training examples
-for which $\mathbf{y}$ is the correct label.
-
+Eq.~\ref{costObjective} depends on the prediction classes in
+$\mathcal{S}$ and the types of bias we seek to avoid in estimating $\mathbf{e}$.
+For $\unorderedS$ and $\orderedS$, we are most concerned with
+unbalanced marginal distributions over labels.  
+Let $c_y$ be the frequency of the label $y$ in the training data,
+$|\{i \mid y_i = y\}|$.
+We propose two choices
+of $\mathbf{n}$, both based on the training data:
 \begin{enumerate}
-
-\item \textbf{Logical} $\mathbf{n}$: Choose $n_S$ as an upper bound
-on $|S|$ that cannot possibly be violated given the training data. 
-For prediction classes 
-$S_{\mathbf{y},\mathbf{y'}}\in\mathcal{S}_{\mathcal{Y}^2}$, 
-choose $n_{S_{\mathbf{y},\mathbf{y'}}}=|D_\mathbf{y}|$, and for prediction 
-classes 
-$S_{\{\mathbf{y},\mathbf{y'}\}}\in\mathcal{S}_{[\mathcal{Y}]^2}$,
-choose 
-$n_{S_{\{\mathbf{y},\mathbf{y'}\}}}=
-\max\big(|D_\mathbf{y}|,|D_\mathbf{y'}|\big)$.
-
-\item \textbf{Expected} $\mathbf{n}$:  Choose $n_S$ as the expected
-number of times a model makes a mistake in $S$ if it predicts labels
-at random according to their distribution in the training data. 
-For prediction classes 
-$S_{\mathbf{y},\mathbf{y'}}\in\mathcal{S}_{\mathcal{Y}^2}$, 
-choose $n_{S_{\mathbf{y},\mathbf{y'}}}=
-\frac{|D_\mathbf{y}||D_\mathbf{y'}|}{m}$, 
-and for prediction classes 
-$S_{\{\mathbf{y},\mathbf{y'}\}}\in\mathcal{S}_{[\mathcal{Y}]^2}$,
-choose 
-$n_{S_{\{\mathbf{y},\mathbf{y'}\}}}=
-\frac{2|D_\mathbf{y}||D_\mathbf{y'}|}{m}$.
-Other variations of this idea might choose alternative models by which
-to compute the expectation, but model that makes predictions at
-according to the training data label distribution seems 
-reasonable for getting rid of the label distribution bias.
-
+\item \textbf{Logical} $\mathbf{n}$:  an upper bound on $v_S(\cdot,
+  \cdot)$ based on frequencies in the training data.  For $\unorderedS$, let
+  $n_{S_{\{y,y'\}}} = \max(c_y, c_{y'})$.  For
+  $\orderedS$, let $n_{S_{y, y'}} = c_y$ where
+  $S_{y,y'}$ corresponds to an erroneous label of $y'$ in place of the
+  correct $y$.
+\item \textbf{Expected} $\mathbf{n}$:  an upper bound calculated by
+  assuming that our learner can perform better than a random
+  classifier that uses label proportions observed in the training
+  data.    For $\unorderedS$, let $n_{S_{\{y,y'\}}} = 2c_y c_{y'} / N$.  For
+  $\orderedS$, let $n_{S_{y,y'}} =  c_y c_{y'} / N$. 
 \end{enumerate}
 
-In general, the \textbf{Logical} choice of $\mathbf{n}$ is an upper
-bound on the \textbf{Expected} choice.  The \textbf{Logical} choice
-will tend to over-estimate the maximum size of each prediction class,
+ The \textbf{Logical} choice
+will tend to dramatically overestimate the maximum count of each
+prediction error,
 but we might choose it over \textbf{Expected} if we have reason
 to believe that it is difficult to estimate the baseline rate at
 which the model is biased to predict certain labels by the label
 distribution independent of the inputs.
+A third option, not explored here, might use a more sophisticated
+model to estimate bounds on error counts.
 
 \bmcomment{More detail on why Expected might be a better 
 choice than Logical}
 
 \section{Experiments}
 
-\bmcomment{Add graphs showing convergence of SGD?}
+We implemented the multiclass SVM (Eq.~\ref{svmObjective}) and
+variations of our method, which we refer to as
+normalized cost learning (\ourmethod{}; Eq.~\ref{costObjective}), using
+stochastic  gradient descent (SGD) \citep{yin2003stochastic}.
+The learning rate at timestep $t$ is $\frac{1}{\lambda_2 t}$
+\citep{shalev2011pegasos}.
+We ran SGD for 150 passes over the data \nascomment{check that}, using a
+random permutation each time.  We observed that, during the last ten
+iterations, accuracy varied by $<
+0.001$ and fewer than 5\% of predictions changed.
 
-We implemented the multiclass SVM and normalized cost learning SVM (SVMCLN) 
-using stochastic (sub-)gradient descent (SGD) to approximate Objectives
-\ref{svmObjective} and \ref{costObjective} (see \citep{yin2003stochastic} on
-SGD).  Our SGD implementation
-used a learning rate of $\frac{1}{\lambda_2 t}$ at time-step $t$ 
-following the Pegasos algorithm in \citep{shalev2011pegasos}.
-We ran several experiments to compare these models on standard
-text classification corpora.  In each experiment, we compared 
-the accuracies of the models on standard train/test split 
-given by each respective
-data corpus while also randomly selecting a 10\% subset of the 
-training data to use as a dev set.  We used the dev set to perform
-a grid search over 16 possible values ranging from $10^{-6}$ to 
-$0.5\times 10^2$ for the $\lambda_2$ hyper-parameter in each model.
-After the grid search, we fixed the best value for $\lambda_2$,
-and retrained on the full training data,
-evaluating the final performance of the model on the test set.  
- 
-Due to the stochasticity of the optimization algorithm, we 
-expected some noisiness in its convergence.  In general, we 
-ran SGD for 150 iterations over the random permutations
-of the full data. After the 150 iterations, the accuracy and 
-predictions of each model on the dev/test sets were relatively 
-stable; the accuracy varied by at most $~0.001$ and 
-fewer $5\%$ of the predictions changed 
-during the last 10 iterations over the training 
-data. 
+We ran several experiments to compare these models on standard text
+classification datasets/tasks, using conventional training/test splits.
+10\% of the training set is used in each case to perform a grid search
+for $\lambda$ over 16 values in $[10^{-6}, 50]$, choosing the one that
+gives the best \nascomment{accuracy?}, then fixing $\lambda$ and
+training on the whole training set.
+
+We consider six variations of \ourmethod{}, varying the prediction error sets
+($\unorderedS$; $\orderedS$) and normalization constants
+($\boldsymbol{1}$, i.e., none; logical; expected). \nascomment{I think
+  that's what ``none'' means -- please check}
 
 \subsection{Datasets}
+
+We considered two datasets with relatively large output label sets:
+20 Newsgroups (20NG; 20 category labels corresponding to newsgroups)\footnote{\url{http://qwone.com/~jason/20Newsgroups}} and Reuters-21578
+(R52; 52 topic labels).\footnote{\url{http://www.csmining.org/index.php/r52-and-r8-of-reuters-21578.html}.}    We followed \citep{acardoso-thesis} in
+preprocessing the text corpora (including downcasing, removing
+symbols, etc.) and let features in $\mathbf{g}$ correspond to $\log (1
++ \mathit{tf})$ (log transformed term frequencies) for unigrams.
+Though alternative feature
+representations (e.g., tfidf; \citep{lan-lan-lo}) may perform better, we do not expect
+their effect to interact with the choice of learning algorithm.
 
 \bmcomment{Cite \url{http://www.aaai.org/Papers/AAAI/2006/AAAI06-121.pdf}
 on relatively low difference in performance between log(tf) and tfidf}
@@ -451,57 +419,21 @@ example use of log(tf)}
 \bmcomment{Preprocessed using method from 
 \url{http://web.ist.utl.pt/acardoso/docs/2007-phd-thesis.pdf}}
 
-We compared the performance of the models on the 20 Newsgroups and
-the Reuters-21578 (R52) data sets.  We chose these two data sets
-because they both have a relatively large number of output labels,
-some of which might not be distinctive enough for the SVM to plausibly
-learn well given its features, in which case we might expect a gain in 
-accuracy from SVMCLN.  As shown below, we found out that this 
-expectation was correct for the 20 Newsgroups data, but incorrect for 
-the Reuters data, for reasons that became apparent to us after we
-reviewed the results.
+The 20NG dataset consists of 18,846 documents, sorted by date, with
+60\% used for training.  Though the categories are roughly uniformly
+distributed, the topics vary greatly in their relatedness, following a
+hierarchical labeling scheme (e.g., \emph{rec.autos} and
+\emph{rec.motorcycles} are likely more closely related than either to
+\emph{sci.space}).  This offers a way to measure the effectiveness of
+\ourmethod{} at learning ``ease'':   the less closely related two categories
+are, the greater the ease in learning to distinguish them.
 
-For both of these data sets, the target labels $\mathcal{Y}$ are 
-single document topics/categories, and the inputs $\mathcal{X}$ are
-documents.  We preprocessed each text document from both corpora 
-using the procedure given in [FILL IN] (convert to lower-case, 
-remove symbols, etc), and then we computed $\mathbf{g}$ as normalized
-$\log$ unigram term-frequency features.  In particular:
+The R52 dataset contains 9,100 documents; we use the ModApte split
+(70\% training).  The label distribution is skewed, with 43\% of
+documents assigned to \nascomment{name the topic here} and 37 topics
+receiving fewer than 50 examples.  \nascomment{maybe say something
+  here about why we think \ourmethod{} won't do as well here?}
 
-\begin{equation}
-\mathbf{g}_{\mathbf{y'}}(\mathbf{x},\mathbf{y}) = \mathbbm{1}(\mathbf{y}=\mathbf{y'})\mathbf{f}(\mathbf{x})
-\end{equation}
-
-Where $\mathbf{f}(\mathbf{x})$ is a normalized vector whose elements 
-are $\log(1+tf(\mathbf{x},v))$ when $v$ is a unigram in the corpus 
-vocabulary and $tf(\mathbf{x},v)$ is the frequency of $v$ in document
- $\mathbf{x}$.
-
-\subsubsection{Reuters 21578 (R52)}
-
-The Reuters-21578 R52 corpus contains 9100 documents from the original
-Reuters-21578 data, each of which is labeled with one of 52 possible topics.
-\footnote{See 
-\url{http://www.csmining.org/index.php/r52-and-r8-of-reuters-21578.html}.}  
-The documents are divided along the Reuters-21578 'ModApte' split
-into \~70\% training and \~30\% test.  The label distribution is extremely
-non-uniform, with 43\% of the documents assigned to a single topic, and
-71\% of the other topics each assigned fewer than 50 (0.5\%) documents.
-
-\subsubsection{20 newsgroups}
-
-The 'by date' version of the 20 Newsgroups data contains 
-18846 documents sorted by date into 60\% for training and 40\% for testing.  
-\footnote{See \url{http://qwone.com/~jason/20Newsgroups/}.} In comparison
-to the Reuters data, the newsgroups distribution of 20 categories is
-nearly uniform, with some topics highly related and some topics entirely
-unrelated.  The relatedness of the topics is approximately captured by
-their hierarchical naming scheme (e.g. there is \textit{rec.autos} and
-\textit{rec.motorcycles} which are likely to be highly related to each
-other, but mostly unrelated to \textit{sci.space}).  We expected that
-this hierarchy would be encoded by the learned 'easiness' approximations,
-since the 'easiness' with which the model discriminates two categories
-likely decreases with their relatedness.
 
 \subsection{Results}
 
@@ -509,105 +441,90 @@ likely decreases with their relatedness.
 
 Table~\ref{accuraciesTable} shows the micro-averaged
 accuracies on the Reuters and 20 newsgroups tasks for the 
-SVM baseline model and versions of SVMCLN with
+SVM baseline model and versions of \ourmethod{} with
 different choices of normalization constants 
-$\mathbf{n}$ and incorrect prediction classes $\mathcal{S}$.  The last column 
-in the table shows that none of the SVMCLN variations improve the
- ccuracy over the SVM on the Reuters task, but inspection of the 
-confusion matrix for the SVM
-baseline provides some intuition for this lack of improvement.  
-The matrix shows
-that $53\%$ of the SVM's mistakes were on examples with whose topics had 10 or
-fewer test examples, all off which were predicted incorrectly.  Furthermore,
-there is no non-diagonal element in the confusion matrix with more than 10 
-mistakes.  These observations suggest that many of the SVM baseline's mistakes
-come from infrequent labels rather than systematic conflations between certain
-label pairs, and further that all of the incorrect prediction classes in the
-cost learning model will be extremely small to begin with.  As a result, it's
-unlikely that SVMCLN would be able to re-scale the costs to greatly shrink
-any incorrect prediction classes.  In hindsight, this provides a good example
-of a good example of how analysis of the errors made by the standard SVM can
-determine whether cost learning will be beneficial.
+$\mathbf{n}$ and incorrect prediction classes $\mathcal{S}$.  
 
-In contrast, the fourth column of Table~\ref{accuraciesTable} shows that 
-every SVMCLN variation improves the accuracy over the SVM on the 20 Newsgroups 
-data.  Unsurprisingly, the \textbf{Logical} 
-and \textbf{Expected} normalized versions
-perform better than the non-normalized versions since they should give better
-estimates of the 'easiness' measure and cost function.  Also, each 
-$\mathcal{S}_{[\mathcal{Y}]^2}$ version performs slightly better than 
-each $\mathcal{S}_{[\mathcal{Y}]^2}$ version, which makes sense given that
-the ease of resolving mistakes in $S_{\mathbf{y},\mathbf{y}'}$ should be 
-the same as the ease of resolving mistakes in $S_{\mathbf{y}',\mathbf{y}}$,
-and so the ordering on $\mathbf{y}$ and $\mathbf{y}'$ gives the model
-unnecessary extra parameters.  We also expected 
-\textbf{Expected} to perform better 
-than \textbf{Logical} since \textbf{Logical} 
-over-estimates the maximum value of each incorrect prediction class, but
-this expectation was not met with 
-$\mathcal{S}_{[\mathcal{Y}]^2}$ prediction
-classes, possibly because the \textbf{Expected} normalizers tend 
-to under-estimate.
+On 20NG, every variant of \ourmethod{} outperforms the baseline SVM.  Logical and
+expected variants of $\mathbf{n}$ outperform the na\"{i}ve version.
+$\unorderedS$ usually has a slight advantage over $\orderedS$
+\nascomment{please check carefully and that I marked these right in
+  the table; you had them reversed}.  This makes sense, given that we
+do not expect any asymmetry in the ease of resolving confusions
+between two labels, and $\orderedS$ introduces extra $\mathbf{e}$ parameters to be
+estimated.
+
+On R52, \ourmethod{} performs slightly worse than the SVM.  Inspecting
+the errors, we find that 53\% of the SVMs mistakes were on examples
+whose topics had ten or fewer test \nascomment{you mean training?}
+examples.  
+\nascomment{I didn't understand this at all:  there is no non-diagonal element in the confusion matrix with more than 10 
+mistakes.}
+  These observations suggest that many of the SVM baseline's mistakes
+come from infrequent labels rather than systematic conflations between certain
+label pairs, and further that all of the prediction error sets in the
+cost learning model will be small.  As a result, it is
+unlikely that rescaling costs, as done by \ourmethod{}, will have much
+benefit.  Fortunately, \ourmethod{} does not harm performance by more
+than 0.5\%.
+
+
+
+
 
 \begin{table}[t]
-\caption{Micro-averaged Accuracies}
+\caption{Micro-averaged accuracies of different
+  learners. \nascomment{helpful if you boldface the best result(s) in
+    each column}}
 \label{accuraciesTable}
 \begin{center}
-\begin{tabular}{lllcccc}
-\bf{Model}  & \bf{$\mathbf{n}$} & \bf{$\mathcal{S}$} & \bf{20news} & \bf{20news level 2}   & \bf{20news level 1}   & \bf{Reuters}
-\\ \hline \\
-SVM         & N/A               & N/A                & 0.7760      & 0.8008                & 0.8654                & 0.9213 \\
-SVMCLN      & None              & $\mathcal{Y}^2$    & 0.8008      & 0.8259                & 0.8752                & 0.9213 \\ 
-SVMCLN      & None              & $[\mathcal{Y}]^2$  & 0.8011      & 0.8257                & 0.8751                & 0.9194 \\
-SVMCLN      & Logical           & $\mathcal{Y}^2$    & 0.8024      & 0.8271                & 0.8769                & 0.9210 \\ 
-SVMCLN      & Logical           & $[\mathcal{Y}]^2$  & 0.8376      & 0.8631                & 0.9142                & 0.9159 \\
-SVMCLN      & Expected          & $\mathcal{Y}^2$    & 0.8303      & 0.8557                & 0.9092                & 0.9159 \\ 
-SVMCLN      & Expected          & $[\mathcal{Y}]^2$  & 0.8307      & 0.8558                & 0.9084                & 0.9171 \\
+\begin{tabular}{l|rrr|r}
+\multirow{2}{*}{\bf Learner} &  \multicolumn{3}{c|}{\bf 20NG} & \multirow{2}{*}{\bf{R52}} \\
+& \bf{full} & \bf{level 2}   & \bf{ level 1}   & 
+\\ \hline 
+SVM         & 0.7760      & 0.8008                & 0.8654                & 0.9213 \\
+\ourmethod{}: $\orderedS$, none    & 0.8008      & 0.8259                & 0.8752                & 0.9213 \\ 
+\ourmethod{}:            $\unorderedS$, none  & 0.8011      & 0.8257                & 0.8751                & 0.9194 \\
+\ourmethod{}: $\orderedS$, logical    & 0.8024      & 0.8271                & 0.8769                & 0.9210 \\ 
+\ourmethod{}: $\unorderedS$, logical  & 0.8376      & 0.8631                & 0.9142                & 0.9159 \\
+\ourmethod{}:  $\orderedS$, expected    & 0.8303      & 0.8557                & 0.9092                & 0.9159 \\ 
+\ourmethod{}: $\unorderedS$, expected       & 0.8307      & 0.8558                & 0.9084                & 0.9171 \\
 \end{tabular}
 \end{center}
 \end{table}
 
+\subsection{Hierarchy and Ease}
+
+
 The hierarchical structure of the 20 Newsgroups topics encodes a notion
-of distance between topics as distance within the hierarchy.  The fifth
-and sixth columns of Table~\ref{accuraciesTable} show the accuracies 
+of distance between topics as distance within the hierarchy.  
+As
+noted above, we expect that more distant topics (in the hierarchy)
+should correspond to greater ease in distinguishing between them.
+Note that \ourmethod{} does not take advantage of any information
+about the hierarchy.
+
+Table~\ref{accuraciesTable} includes accuracies 
 computed when nearby topics in the hierarchy are are collapsed into
-single topics--the fifth column shows the accuracies computed when all
-topics that are the same to two levels deep in the hierarchy are collapsed
-into a single topic, and the sixth column shows the accuracies computed
-when all topics that are the same at the first level of the hierarchy are
-collapsed into a single topic.  
+single topics, either at the second level (i.e., into \nascomment{??}
+categories) or the first (i.e., into \nascomment{??} categories).
+The advantages of \ourmethod{} are nearly as great for these collapsed
+tasks as for the primary one, meaning that it is better than the SVM
+at distinguishing topics that are farther apart in the hierarchy, and
+therefore has learned a notion of ease that relates to hierarchy
+distance.
 
-\bmcomment{I think there are ways to make the following result clearer
-if we compute other numbers... but I don't know if we have time for that.
-This may be a bit confusing I think though}
-
-The cost learning should learn a notion of distance between topics 
-approximated by the cost function, and we expect this notion of distance
-to approximate the notion of distance encoded by the hierarchy.  The 
-approximated notion of distance encoded in the cost function should 
-cause SVMCLN to improve at distinguishing topics that it estimates to
-be far apart from each other.  So if SVMCLN's learned distances 
-approximate the distances through the hierarchy, then we should expect the SVMCLN's collapsed 
-accuracy improvements to be nearly as great as the uncollapsed accuracy
-improvements.  This is shown by the [FILL] accuracy improvements in the
-fourth, fifth, and sixth columns of Table~\ref{accuraciesTable} by
-the \textbf{Logical} $\mathcal{S}_{[\mathcal{Y}]^2}$ version of SVMCLN.
 
 \bmcomment{Fix the above paragraph when get new numbers}
+
+We checked this directly by using $\mathbf{e}$ to reconstruct the
+hierarchy by applying a hierarchical clustering algorithm. 
 
 \bmcomment{Cite hierarchical clustering.  Be specific about which
 type of hierarchical clustering is used.}
 
 \bmcomment{Add hierarchy figure.}
 
-We also directly evaluated the extent to which the cost function approximates
-the newsgroup hierarchy by constructing a hierarchy from the 
-'easiness' approximations and comparing it to the newsgroup hierarchy.
-In order to construct the hierarchy, we ran hierarchical clustering on
-the newsgroups where each approximated 'easiness' value acts as a
-distance measure.  The approximate hierarchy for the \textbf{Logical}
-$\mathcal{S}_{[\mathcal{Y}]^2}$ SVMCLN is shown in figure [FILL], and the true
-Newsgroup hierarchy is shown in figure [FILL].  
 
 \bmcomment{Add measurements of similarity between hierarchies}
 
@@ -648,12 +565,9 @@ Newsgroup hierarchy is shown in figure [FILL].
 %\end{tikzpicture}
 
 
-\section{Discussion}
+\section{Related Work}
 
-\bmcomment{Maybe add summary of conclusions here or at the 
-very end...?}
 
-\subsection{Related literature}
 
 \bmcomment{Here are some things to possibly write about:}
 
@@ -673,83 +587,43 @@ Finite state output encodings mentioned in
 \url{http://www.cs.cmu.edu/~nasmith/papers/career-proposal-2010.pdf}
 \citep{loper2008encoding}
 
-\subsection{Future work}
+\subsection{Future Work and Conclusions}
 
 \bmcomment{Is there anything else that I forgot?}
 
-We made several choices within the present work for which
-many alternatives might be interesting to pursue in
-future research.  We proposed two choices for 
-sets $\mathcal{S}$ of incorrect prediction classes which 
-bucket predictions based on label pairs, but many others
-are possible. For example, we might consider construct
-prediction classes for varying frequencies of the labels
-in the training data, motivated by the idea that incorrect
-predictions involving frequently occurring labels are easier
-to resolve than incorrect predictions involving infrequently
-occurring labels.  
+In future work, richer representations of prediction error types
+($\mathcal{S}$) might be pursued.  For example, classes might be 
+constructed based on frequencies of classes, with the rarest labels forming
+a group.  For structured output spaces such as natural language
+parsing, the domain might suggest
+groups of errors; post hoc analysis of $\mathbf{e}$ might, in turn,
+suggest ways to improve the model through feature
+engineering.\footnote{We note an interesting parallel to the
+  \emph{ceteris paribus} reasoning suggested by inspection of
+linear model weights $\mathbf{w}$; inspecting $\mathbf{e}$ shows,
+``all other things equal,'' a scaling of error types by ease-of-avoidance.}
+Our framework is easily extended to let these classes depend on
+the input or metadata as well, allowing very rich parameterizations of
+learnable cost functions.  Recall that these classes need not be mutually exclusive.
 
-Another idea is to change the cost function
-to incorporate the input $\mathbf{x}_i$ as 
-$\Delta(\mathbf{x}_i,\mathbf{y}_i,\mathbf{y})$, This would
-allow the incorrect prediction classes and their 'easiness' 
-estimates to depend on features of the input--which would
-possibly be beneficial to the model for learning and to 
-the model engineer for error analysis.
+Alternative ways to estimate $\mathbf{n}$ might also be considered,
+such as using a more sophisticated model to estimate bounds on error
+frequencies in the training set.  More generally, characterizations of
+ease might be developed through alternate means, such as the
+stability measure from learning theory \citep{mukherjee2006learning},
+which might offer insight into the generalizability of predictions
+involving a particular label.
 
-We chose to explore the straightforward \textbf{Logical} 
-and \textbf{Expected} values for $\mathbf{n}$, but we might 
-also consider using a more sophisticated model to estimate the 
-irrelevant biases in the sizes of the incorrect prediction 
-classes.
+We concede that our notion of ``ease'' merges several concepts that
+might be treated separately.  These include the reliability of the
+labels in training data, the distinctiveness of the labels given the
+model family (choice of features), the learnability of each label
+given the number of instances it has in the training set, and the
+overall similarity of the training distribution to the ``true'' one.
+We believe it is an open theoretical question how these various
+notions might relate to learning guarantees.
 
-Our cost learning model was build for multiclass classification
-tasks, but it should be easy to extend to structured prediction
-tasks.
 
-\bmcomment{Noah, would it be good to talk about some of the
-learning output spaces ideas from your career proposal in 
-relation to the structured possibility here?}
-
-In the more general theme of cost function learning, it's possible
-to choose alternative measures of 'easiness' that do not directly
-depend on the sizes of the prediction classes and could require
-changing the model to an entirely different form.  For example,
-we might make easiness depend on some measure of linear separability
-between each label pair, or generalizability of predictions involving
-certain labels. The generalizability of certain predictions might 
-be characterized by some measure like 'stability' from learning 
-theory \citep{mukherjee2006learning}.
-
-\bmcomment{The comment about stability might be entirely off base
-because I don't know anything about it, but it was something
-I wanted to look into.}
-
-There are also several unanswered theoretical questions related 
-to this work.  We have used scare-quotes around 'easiness' throughout
-this paper because we aren't using the term in an unambiguous way,
-and we don't have a single precise concept in mind.  There are
-several concepts of 'easiness' related to, e.g., the reliability 
-of the annotated labels, the distinctiveness of the labels given the 
-choice of features, the distinctiveness of the labels given
-the choice of model, the learnability of each label given its
-frequency, or the similarity between the distribution of the
-training data and the true distribution. There are several ways we 
-might model these notions of 'easiness' by the choice of 
-model and the categorization of incorrect predictions into classes.
-It would be interesting to describe a taxonomy of different kinds
-of 'easiness' and ways in which they might be learned.  Furthermore,
-it would be useful to find a systematic way to predict whether 
-learning a given notion of 'easiness' on a data set will allow a model 
-to improve its accuracy.  Analyzing the confusion matrix for the
-Reuter's data helped us make some guesses about why the notion of 'easiness' 
-captured by our model did not help improve its performance, but
-there might be ways of making our intuitions about this more systematic.
-
-\bmcomment{Possibly move parts of the previous paragraph to 
-the background/introduction sections. Also might want to reword it to
-make clearer, or just talk about it in a different way.  At least
-make it shorter...}
 
 %\subsubsection*{Acknowledgments}
 
@@ -761,6 +635,7 @@ make it shorter...}
 \bmcomment{The 'references' heading given by the 
 bibliography command is the wrong size font.  Needs to
 be the size of a 'third level heading'.  How to change this?}
+\nascomment{maybe the problem comes from using natbib?}
 
 \bibliography{refs}
 
