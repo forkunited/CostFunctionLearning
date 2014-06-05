@@ -58,6 +58,9 @@ Pittsburgh, PA 15213 \\
 
 \bmcomment{Probably need a better title.}
 
+\bmcomment{It seems like a lot of other papers refer to 'cost' as 'loss'... 
+Is there somewhere where people call it 'cost' like we are?}
+
 \bmcomment{Noah, I put your name second because your name seems 
 to be last on all of your recent papers.  I don't care which our names is
 first though, so feel free to swap if you want.}
@@ -693,30 +696,106 @@ Newsgroup hierarchy is shown in figure [FILL].
 
 \section{Discussion}
 
+\bmcomment{Maybe add summary of conclusions here or at the 
+very end...?}
+
 \subsection{Related literature}
 
-% See possible reference list below
-\bmcomment{I have trouble writing this part.}
+\bmcomment{Here are some things to possibly write about:}
+
+Self-paced learning \citep{kumar2010self}.
+
+Curriculum Learning \citep{bengio2009curriculum}.
+
+Confidence weighted learning \citep{dredze2008confidence}.
+
+Ed Hovy inter-annotator agreement cost \citep{plank2014learning}
+
+Hidden variable learning by state splitting mentioned in 
+\url{http://www.cs.cmu.edu/~nasmith/papers/career-proposal-2010.pdf} 
+\citep{petrov2011coarse}.
+
+Finite state output encodings mentioned in 
+\url{http://www.cs.cmu.edu/~nasmith/papers/career-proposal-2010.pdf}
+\citep{loper2008encoding}
 
 \subsection{Future work}
 
-\bmcomment{There's probably lots of stuff I don't know about
-which could go here.  Here are some ideas though:}
+\bmcomment{Is there anything else that I forgot?}
 
-\bmcomment{Incorporate input features into cost}
+We made several choices within the present work for which
+many alternatives might be interesting to pursue in
+future research.  We proposed two choices for 
+sets $\mathcal{S}$ of incorrect prediction classes which 
+bucket predictions based on label pairs, but many others
+are possible. For example, we might consider construct
+prediction classes for varying frequencies of the labels
+in the training data, motivated by the idea that incorrect
+predictions involving frequently occurring labels are easier
+to resolve than incorrect predictions involving infrequently
+occurring labels.  
 
-\bmcomment{Other choices for n}
+Another idea is to change the cost function
+to incorporate the input $\mathbf{x}_i$ as 
+$\Delta(\mathbf{x}_i,\mathbf{y}_i,\mathbf{y})$, This would
+allow the incorrect prediction classes and their 'easiness' 
+estimates to depend on features of the input--which would
+possibly be beneficial to the model for learning and to 
+the model engineer for error analysis.
 
-\bmcomment{Other measures of 'easiness'}
+We chose to explore the straightforward \textbf{Logical} 
+and \textbf{Expected} values for $\mathbf{n}$, but we might 
+also consider using a more sophisticated model to estimate the 
+irrelevant biases in the sizes of the incorrect prediction 
+classes.
 
-\bmcomment{Structured version}
+Our cost learning model was build for multiclass classification
+tasks, but it should be easy to extend to structured prediction
+tasks.
 
-\bmcomment{Alternating minimization version}
+\bmcomment{Noah, would it be good to talk about some of the
+learning output spaces ideas from your career proposal in 
+relation to the structured possibility here?}
 
-\bmcomment{Relationship between model 'difficulty' and 'task' difficulty}
+In the more general theme of cost function learning, it's possible
+to choose alternative measures of 'easiness' that do not directly
+depend on the sizes of the prediction classes and could require
+changing the model to an entirely different form.  For example,
+we might make easiness depend on some measure of linear separability
+between each label pair, or generalizability of predictions involving
+certain labels. The generalizability of certain predictions might 
+be characterized by some measure like 'stability' from learning 
+theory \citep{mukherjee2006learning}.
 
-\bmcomment{Characterize properties of data/features that determine 
-whether cost learning is useful}
+\bmcomment{The comment about stability might be entirely off base
+because I don't know anything about it, but it was something
+I wanted to look into.}
+
+There are also several unanswered theoretical questions related 
+to this work.  We have used scare-quotes around 'easiness' throughout
+this paper because we aren't using the term in an unambiguous way,
+and we don't have a single precise concept in mind.  There are
+several concepts of 'easiness' related to, e.g., the reliability 
+of the annotated labels, the distinctiveness of the labels given the 
+choice of features, the distinctiveness of the labels given
+the choice of model, the learnability of each label given its
+frequency, or the similarity between the distribution of the
+training data and the true distribution. There are several ways we 
+might model these notions of 'easiness' by the choice of 
+model and the categorization of incorrect predictions into classes.
+It would be interesting to describe a taxonomy of different kinds
+of 'easiness' and ways in which they might be learned.  Furthermore,
+it would be useful to find a systematic way to predict whether 
+learning a given notion of 'easiness' on a data set will allow a model 
+to improve its accuracy.  Analyzing the confusion matrix for the
+Reuter's data helped us make some guesses about why the notion of 'easiness' 
+captured by our model did not help improve its performance, but
+there might be ways of making our intuitions about this more systematic.
+
+\bmcomment{Possibly move parts of the previous paragraph to 
+the background/introduction sections. Also might want to reword it to
+make clearer, or just talk about it in a different way.  At least
+make it shorter...}
 
 %\subsubsection*{Acknowledgments}
 
