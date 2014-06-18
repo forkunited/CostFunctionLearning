@@ -16,7 +16,7 @@ public class TestDatum extends Datum<TestLabel>  {
 		return this.featureValues;
 	}
 	
-	public static class Tools extends Datum.Tools<TestDatum,TestLabel> {
+	public static class Tools extends CostDatumTools<TestDatum,TestLabel> {
 		public Tools(DataTools dataTools) {
 			super(dataTools);
 			

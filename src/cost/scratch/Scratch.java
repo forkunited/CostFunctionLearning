@@ -9,15 +9,15 @@ import java.util.List;
 import java.util.Map;
 
 import ark.data.DataTools;
-import ark.data.annotation.Datum.Tools;
 import ark.data.feature.Feature;
 import ark.data.feature.FeaturizedDataSet;
 import ark.model.SupervisedModel;
-import ark.model.cost.FactoredCost;
 import ark.util.FileUtil;
 import ark.util.OutputWriter;
+import cost.data.annotation.CostDatumTools;
 import cost.data.annotation.TestDatum;
 import cost.data.annotation.TestLabel;
+import cost.model.factoredcost.FactoredCost;
 import cost.util.CostProperties;
 
 public class Scratch {
@@ -28,7 +28,7 @@ public class Scratch {
 		
 		DataTools dataTools = new DataTools(output);
 		dataTools.addToParameterEnvironment("DATA_SET", dataSetName);
-		Tools<TestDatum, TestLabel> datumTools = new TestDatum.Tools(dataTools);
+		CostDatumTools<TestDatum, TestLabel> datumTools = new TestDatum.Tools(dataTools);
 		String dataSetPath = (new File(properties.getFakeDataDirPath(), dataSetName)).getAbsolutePath();
 		
 
