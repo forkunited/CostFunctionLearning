@@ -23,10 +23,11 @@ public class ExperimentKCVTest {
 
 		CostProperties properties = new CostProperties();
 		String experimentInputPath = new File(properties.getExperimentInputDirPath(), experimentName + ".experiment").getAbsolutePath();
+		File experimentOutputDir = new File(properties.getExperimentOutputDirPath(), dataSetName);
 		File experimentOutputFile = new File(properties.getExperimentOutputDirPath(), experimentOutputName);
 		String experimentOutputPath = experimentOutputFile.getAbsolutePath(); 
 		
-		experimentOutputFile.mkdirs();
+		experimentOutputDir.mkdirs();
 		
 		OutputWriter output = new OutputWriter(
 				new File(experimentOutputPath + ".debug.out"),
