@@ -7,7 +7,7 @@ gridSearchParameterValues=l2(.001,.01,.1, 1, 10, 100, 1000, 10000)
 model=SVMCLN()
 {
 	validLabels=L_0,L_1,L_2,L_3,L_4,L_5,L_6
-	trainingIterations=2001
+	trainingIterations=10001
 	factoredCost=LabelPair(c=1, norm=NONE)
 }
 feature=Identity(doubleExtractor=Identity)
