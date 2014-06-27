@@ -22,6 +22,16 @@ import ark.data.annotation.Datum;
 import ark.model.SupervisedModelPartition;
 import ark.model.SupervisedModelSVMStructured;
 
+/**
+ * CostDatumTools contains cost function learning tools for manipulating
+ * data sets.  An instance of this class can be used to instantiate cost
+ * function learning models for a given type of datum.
+ * 
+ * @author Bill McDowell
+ *
+ * @param <D> datum type
+ * @param <L> datum label type
+ */
 public abstract class CostDatumTools<D extends Datum<L>,L> extends Datum.Tools<D, L> {	
 	private Map<String, FactoredCost<D, L>> genericFactoredCosts;
 	

@@ -1,48 +1,5 @@
-This is BibTeX, Version 0.99d (TeX Live 2011)
-Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
-The top-level auxiliary file: nips2014.aux
+This is BibTeX, Version 0.99dThe top-level auxiliary file: nips2014.aux
 The style file: unsrt.bst
 Database file #1: refs.bib
 Warning--empty journal in koller2003max
-You've used 14 entries,
-            1791 wiz_defined-function locations,
-            520 strings with 5812 characters,
-and the built_in function-call counts, 3058 in all, are:
-= -- 270
-> -- 129
-< -- 5
-+ -- 49
-- -- 35
-* -- 164
-:= -- 478
-add.period$ -- 44
-call.type$ -- 14
-change.case$ -- 12
-chr.to.int$ -- 0
-cite$ -- 15
-duplicate$ -- 159
-empty$ -- 316
-format.name$ -- 35
-if$ -- 708
-int.to.chr$ -- 0
-int.to.str$ -- 14
-missing$ -- 13
-newline$ -- 72
-num.names$ -- 14
-pop$ -- 65
-preamble$ -- 1
-purify$ -- 0
-quote$ -- 0
-skip$ -- 70
-stack$ -- 0
-substring$ -- 130
-swap$ -- 44
-text.length$ -- 5
-text.prefix$ -- 0
-top$ -- 0
-type$ -- 0
-warning$ -- 1
-while$ -- 28
-width$ -- 16
-write$ -- 152
 (There was 1 warning)

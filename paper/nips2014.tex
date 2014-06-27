@@ -31,13 +31,13 @@
 \title{Learning Not to Try Too Hard}
 
 \author{
-Bill McDowell\thanks{Alternative email: \texttt{forkunited@gmail.com}}
+Bill McDowell\thanks{Alternative email: \texttt{forkunited@gmail.com}} \\
 School of Computer Science\\
 Carnegie Mellon University\\
 Pittsburgh, PA 15213 \\
 \texttt{wmcdowel@cs.cmu.edu} \\
 \And
-Noah A.~Smith
+Noah A.~Smith \\
 School of Computer Science\\
 Carnegie Mellon University\\
 Pittsburgh, PA 15213 \\
@@ -55,25 +55,19 @@ Pittsburgh, PA 15213 \\
 \newcommand{\fix}{\marginpar{FIX}}
 \newcommand{\new}{\marginpar{NEW}}
 
-%\nipsfinalcopy % Uncomment for camera-ready version
+\nipsfinalcopy % Uncomment for camera-ready version
 
 \begin{document}
 
 \maketitle
 
+%\bmcomment{It seems like a lot of other papers refer to 'cost' as 'loss'... 
+%Is there somewhere where people call it 'cost' like we are?}
+%\nascomment{will address this}
 
-\bmcomment{It seems like a lot of other papers refer to 'cost' as 'loss'... 
-Is there somewhere where people call it 'cost' like we are?}
-\nascomment{will address this}
-
-\bmcomment{Noah, I put your name second because your name seems 
-to be last on all of your recent papers.  I don't care which our names is
-first though, so feel free to swap if you want.} \nascomment{I usually
-go last}
-
-\begin{abstract}
-\nascomment{do last}
-\end{abstract}
+%\begin{abstract}
+%\nascomment{do last}
+%\end{abstract}
 
 \section{Introduction}
 
@@ -103,14 +97,13 @@ making other, less challenging predictions more accurately
 
 
 
-\bmcomment{Might want to give some motivating examples? Not sure if that's
-necessary or not. One example of multiclass domain, and one example where
-cost functions are used in structured domains} 
+%\bmcomment{Might want to give some motivating examples? Not sure if that's
+%necessary or not. One example of multiclass domain, and one example where
+% cost functions are used in structured domains} 
 
-\bmcomment{Mention examples of measures of 'difficulty'? Cite.}
+% \bmcomment{Mention examples of measures of 'difficulty'? Cite.}
 
-
-
+\bmcomment{Modify this.}
 Our experiments with text classification show  scenarios where the method achieves
 performance improvements over a strong baseline.
 
@@ -135,7 +128,7 @@ Our approach, which assumes $\mathcal{Y}$ is categorical, is based on
 the soft margin formulation of multiclass support vector machines
 \citep{vapnik1998statistical,crammer2002algorithmic,weston1998multi}.
 Tsochantaridis et al.~\citep{tsochantaridis2004support} and Taskar et
-al.~\ref{koller2003max} generalized this framework to allow for
+al.~\citep{koller2003max} generalized this framework to allow for
 differences in costs between different kinds of mistakes, as found
 when $\mathcal{Y}$ is structured.  Let the cost function
 $\Delta:\mathcal{Y}\times\mathcal{Y}\rightarrow\mathbb{R}$  be such
@@ -158,13 +151,15 @@ hinge loss:
 \label{svmObjective}
 \min_{\mathbf{w}} \frac{\lambda}{2}\|\mathbf{w}\|_2^2 +
 \sum_{i=1}^N  -f(x_i, y_i; \mathbf{w}) + \max_{y \in \mathcal{Y}}
-  f(x_i, y; \mathbf{w} + \Delta(y, y_i)
+  f(x_i, y; \mathbf{w}) + \Delta(y, y_i)
 \end{equation}
 
 We introduce some notation for errors.
 We let $\mathcal{S} \subseteq 2^{\mathcal{Y}\times\mathcal{Y}}$ be a
-collection of prediction error classes that exhausts $\mathcal{Y}^2$ (i.e., $\bigcup_{S \in
-  \mathcal{S}} S = \mathcal{Y}^2$); the error classes need not be
+collection of prediction error classes that 
+exhausts $\mathcal{Y}^2$ (i.e., $\bigcup_{S \in
+  \mathcal{S}} S = \mathcal{Y}^2$); the error 
+  classes need not be
 mutually exclusive.  We let $e_{S} \in \mathbb{R}$ denote an estimate
 of the ``ease'' with which a learner searching in $\mathcal{M}$ 
 can successfully avoid errors in class $S$.  Then we let:
@@ -225,7 +220,7 @@ choice of features $\mathbf{g}$.
 
 
 \subsection{Ease}
-
+\label{sec:ease}
 We desire a model that estimates prediction ease $\mathbf{e}$ while
 estimating
 predictive model parameters $\mathbf{w}$. 
@@ -236,7 +231,9 @@ estimate.  We propose that, for error class $S$ and a model with
 parameters $\mathbf{w}$, ease $e_S$ should be inversely related to the
 number of
 of margin violations involving $S$ that $f(\cdot, \cdot; \mathbf{w})$ makes in the
-training data:
+training data assuming that $\argmax$ always gives a 
+single label, breaking ties arbitrarily:
+
 \begin{equation}
 v_S (\mathbf{w}, \mathbf{e}) \triangleq \left|\left\{ i  \in \{1,\ldots, D\} \mid \left(y_i, \textstyle \argmax_{y \in \mathcal{Y}} f(x_i, y ; \mathbf{w}) +
 \mathbf{e}^\top \mathbf{s}(y, y_i)\right) \in S\right\}\right| \label{eq:set}
@@ -258,10 +255,9 @@ where $n_S$ is a fixed, \emph{a priori} upper bound on the count of
 $S$ errors, $v_S$.   This
 has the desirable property that  if $v_S \ge n_S$,  i.e., $S$ is too
 difficult to shrink, then ease $e_S$ goes to zero and the model is
-allowed to give up on $S$.  It also keeps $e_S \in [0,1]$, giving it
-an intuitive interpretation that undifferentiated errors (i.e., $\mathbf{e}=\boldsymbol{1}$).
-
-
+allowed to give up on $S$.  It also keeps $e_S \in [0,1]$, 
+ensuring interpretability of the ease relative to the
+maximum possible value of $e_S=1$.
 
 % The size of $S_{\mathcal{M},\mathbf{g},D}$ is the number of
 % training examples with margin violations in class $S$. If
@@ -309,33 +305,96 @@ Eq.~\ref{svmObjective}; it is a joint optimization of $\mathbf{w}$ and $\mathbf{
 where $\mathbf{n}$ is the vector of upper bounds on prediction error
 frequencies and $\|\mathbf{e}\|_{\mathbf{n}}^2 = \sum_{S \in
   \mathcal{S}} n_Se_S^2$.  The changes amount to (1) including
-$\mathbf{e}$ as a free variable and (2) regualrizing it with a quadratic
+$\mathbf{e}$ as a free variable and (2) regularizing it with a quadratic
 penalty (second term in Eq.~\ref{costObjective}) and a linear penalty
 (third term in Eq.~\ref{costObjective}).  The linear penalty selects
 which $e_S$ should be nonzero---equivalently, are not impossibly
-difficult.  Setting $e_S = 0$ amounts to giving up on $S$ errors.
+difficult. Setting $e_S=0$ amounts to giving up on $S$
+errors.\footnote{The meaning of 'giving up' is unclear.  It seems
+that setting $e_S=0$ actually amounts to giving up on margin maximization,
+but not error minimization with respect to $S$, but we don't work 
+this out in detail.\bmcomment{Noah, do you understand
+this differently?}}
+
+Most importantly, Eq.~\ref{costObjective} is minimized at $\mathbf{e}$ 
+that matches Eq.~\ref{e-condition}.  To see this, we can find the 
+subdifferential $\partial C$ of the function $C$ minimized in
+Eq.~\ref{costObjective}, and consider the optimized ease values 
+$\mathbf{e}^*$
+for which $\mathbf{0}\in \partial C(\mathbf{w}^*,\mathbf{e}^*)$.  
+$\partial C$ is given by:
+
+\begin{equation}
+\label{subdifferential}
+\begin{split}
+\partial C(\mathbf{w},\mathbf{e}) = & \frac{\lambda}{2}\nabla (\|\mathbf{w}\|_2^2)
++\frac{1}{2}\nabla (\|\mathbf{e}\|^2_{\mathbf{n}})-\nabla (\mathbf{e}^\top \mathbf{n})
++ \\ 
+& \sum_{i=1}^N -\nabla (f(x_i,y_i; \mathbf{w}))+ 
+\mathbf{Co}(\nabla F^{\Delta}_{\max}(x_i,y_i;\mathbf{w},\mathbf{e}))
+\end{split}
+\end{equation}
+
+Where addition, subtraction, and $\nabla$ are overloaded to perform sums,
+subtractions, and gradients over sets, 
+$\mathbf{Co}(\cdot)$ gives the convex hull of a
+set, and $F^{\Delta}_{\max}$ is defined as:
+
+\begin{equation}
+\label{FmaxDef}
+F^{\Delta}_{\max}(x,y;\mathbf{w},\mathbf{e}) = 
+\{ f(x, \hat{y} ; \mathbf{w}) +
+\mathbf{e}^\top \mathbf{s}(y, \hat{y})
+| \hat{y}\in\argmax_{y' \in \mathcal{Y}} f(x, y' ; \mathbf{w}) +
+\mathbf{e}^\top \mathbf{s}(y, y') \}
+\end{equation}
+
+We are only interested in the value of $\mathbf{e}$, so
+we can consider Eq.~\ref{subdifferential} reduced to 
+a simpler subdifferential 
+with respect to a single component $e_S$ of $\mathbf{e}$:
+
+\begin{equation}
+\label{eSubdifferential}
+\partial_{e_S} C(\mathbf{w},\mathbf{e}) = 
+n_S e_S -n_S+
+\sum_{i=1}^N 
+\mathbf{Co}(\frac{\partial 
+F^{\Delta}_{\max}(x_i,y_i;\mathbf{w},\mathbf{e})}{\partial e_S})
+\end{equation}
+
+Given that $\mathbf{0}\in \partial C(\mathbf{w}^*,\mathbf{e}^*)$,
+Eq~\ref{eSubdifferential} leads to:
+
+\begin{equation}
+\label{optimal-e}
+e_S^*\in 1 - \frac{\sum_{i=1}^N 
+\mathbf{Co}(\frac{\partial 
+F^{\Delta}_{\max}(x_i,y_i;\mathbf{w}^*,\mathbf{e}^*)}{\partial e_S})}{n_S}
+\end{equation}
+
+If we allow the $\argmax$ in Eq.~\ref{FmaxDef} to arbitrarily break
+ties as in Section~\ref{sec:ease}, and we constrain $e^*_S\geq 0$ as in
+Eq.~\ref{costObjective}, then Eq.~\ref{optimal-e} suggests that 
+$e^*_S$ takes on the value given by Eq.~\ref{e-condition} when the
+objective is minimized.  So our objective chooses values of 
+$\mathbf{e}$ according to our intuitions from Section~\ref{sec:ease}.
+
+%At points of the objective in Eq.~\ref{costObjective} that are 
+%differentiable with respect to $e_S$, then it is
+%traightforward to show that Eq.~\ref{e-condition} holds.  At
+%non-differentiable points, which occur due to ties among $y$, $e_S$ will lie
+%between the values given by Eq.~\ref{e-condition} for these tied $y$.
+
+%\bmcomment{Is this non-differentiable part understandable?  Is it enough,
+%or do I need to give the proof?  I still haven't actually gone through
+%the proof completely, so maybe we should at least go over the reasoning
+%to make sure I'm not crazy.} \nascomment{I think we should add the
+%proof.  the paper is short, so there is room, at least right now.
+%might be okay just to give the proof for differentiable case.}
 
 
-\bmcomment{Cite self-paced learning for inspiration for new objective
-  function?} \nascomment{not sure}
-
-\bmcomment{Add footnote about relationship between norm in objective and
-Mahalanobis norm} \nascomment{not sure this is critical}
-
-At points of the objective in Eq.~\ref{costObjective} that are differentiable with respect to $e_S$, then it is
-straightforward to show that Eq.~\ref{e-condition} holds.  At
-non-differentiable points, which occur due to ties among $y$, $e_S$ will lie
-between the values given by Eq.~\ref{e-condition} for these tied $y$.
-
-\bmcomment{Is this non-differentiable part understandable?  Is it enough,
-or do I need to give the proof?  I still haven't actually gone through
-the proof completely, so maybe we should at least go over the reasoning
-to make sure I'm not crazy.} \nascomment{I think we should add the
-proof.  the paper is short, so there is room, at least right now.
-might be okay just to give the proof for differentiable case.}
-
-
-\subsection{Constants $\mathbf{n}$}
+\subsection{Constants \textbf{n}}
 
 The appropriate choice for the normalization vector $\mathbf{n}$ in 
 Eq.~\ref{costObjective} depends on the prediction classes in
@@ -349,7 +408,7 @@ of $\mathbf{n}$, both based on the training data:
 \begin{enumerate}
 \item \textbf{Logical} $\mathbf{n}$:  an upper bound on $v_S(\cdot,
   \cdot)$ based on frequencies in the training data.  For $\unorderedS$, let
-  $n_{S_{\{y,y'\}}} = \max(c_y, c_{y'})$.  For
+  $n_{S_{\{y,y'\}}} = c_y+c_{y'}$.  For
   $\orderedS$, let $n_{S_{y, y'}} = c_y$ where
   $S_{y,y'}$ corresponds to an erroneous label of $y'$ in place of the
   correct $y$.
@@ -363,61 +422,63 @@ of $\mathbf{n}$, both based on the training data:
  The \textbf{Logical} choice
 will tend to dramatically overestimate the maximum count of each
 prediction error,
-but we might choose it over \textbf{Expected} if we have reason
-to believe that it is difficult to estimate the baseline rate at
-which the model is biased to predict certain labels by the label
+but we might choose it over \textbf{Expected} if we
+believe that the random classifier would not give a baseline rate at
+which our model is biased to predict certain labels by the label
 distribution independent of the inputs.
 A third option, not explored here, might use a more sophisticated
 model to estimate bounds on error counts.
-
-\bmcomment{More detail on why Expected might be a better 
-choice than Logical}
 
 \section{Experiments}
 
 We implemented the multiclass SVM (Eq.~\ref{svmObjective}) and
 variations of our method, which we refer to as
 normalized cost learning (\ourmethod{}; Eq.~\ref{costObjective}), using
-stochastic  gradient descent (SGD) \citep{yin2003stochastic}.
-The learning rate at timestep $t$ is $\frac{1}{\lambda_2 t}$
-\citep{shalev2011pegasos}.
-We ran SGD for 150 passes over the data \nascomment{check that}, using a
-random permutation each time.  We observed that, during the last ten
-iterations, accuracy varied by $<
-0.001$ and fewer than 5\% of predictions changed.
+stochastic  gradient descent (SGD) with a learning rate determined
+by AdaGrad \citep{yin2003stochastic}\citep{duchi2011adaptive}.
+We ran SGD for 50 passes over the data, using a
+random permutation each time.  We observed that during the last ten
+passes, accuracy varied by $<
+0.01$ and fewer than 10\% of predictions changed.\footnote{
+We were originally running for 150 iterations for previous buggy
+versions, but we adjusted down to 50 iterations after we realized
+that these experiments were going to give a negative result.  It's
+extremely unlikely that increasing the number of iterations to 150 will
+change the current conclusions, but if this work is ever published,
+we might want to rerun other versions of the algorithm with a larger
+number of iterations--just to be safe.
+}
 
 We ran several experiments to compare these models on standard text
 classification datasets/tasks, using conventional training/test splits.
 10\% of the training set is used in each case to perform a grid search
 for $\lambda$ over 16 values in $[10^{-6}, 50]$, choosing the one that
-gives the best \nascomment{accuracy?}, then fixing $\lambda$ and
-training on the whole training set.
+gives the best accuracy, and then fixing $\lambda$ and
+training on the whole training set.\footnote{We also ran experiments
+on synthetic data sets, but the results for those experiments are similar
+to the results for the text-classification data sets, and 
+so they are not included in this document. Specifically, the synthetic data
+set results show at most minor performance gains on some versions of the data
+although the cost function seems to always be learned appropriately.
+ See the code documentation
+at \url{https://github.com/forkunited/CostFunctionLearning/} for more 
+detail.}
 
 We consider six variations of \ourmethod{}, varying the prediction error sets
 ($\unorderedS$; $\orderedS$) and normalization constants
-($\boldsymbol{1}$, i.e., none; logical; expected). \nascomment{I think
-  that's what ``none'' means -- please check}
+($\boldsymbol{1}$, i.e., none; logical; expected).
 
 \subsection{Datasets}
 
 We considered two datasets with relatively large output label sets:
-20 Newsgroups (20NG; 20 category labels corresponding to newsgroups)\footnote{\url{http://qwone.com/~jason/20Newsgroups}} and Reuters-21578
-(R52; 52 topic labels).\footnote{\url{http://www.csmining.org/index.php/r52-and-r8-of-reuters-21578.html}.}    We followed \citep{acardoso-thesis} in
+20 Newsgroups (20NG; 20 category labels corresponding to newsgroups)
+\footnote{\url{http://qwone.com/~jason/20Newsgroups}} and Reuters-21578
+(R52; 52 topic labels).
+\footnote{\url{http://www.csmining.org/index.php/r52-and-r8-of-reuters-21578.html}.}    
+We followed \citep{2007:phd-Ana-Cardoso-Cachopo} in
 preprocessing the text corpora (including downcasing, removing
-symbols, etc.) and let features in $\mathbf{g}$ correspond to $\log (1
-+ \mathit{tf})$ (log transformed term frequencies) for unigrams.
-Though alternative feature
-representations (e.g., tfidf; \citep{lan-lan-lo}) may perform better, we do not expect
-their effect to interact with the choice of learning algorithm.
-
-\bmcomment{Cite \url{http://www.aaai.org/Papers/AAAI/2006/AAAI06-121.pdf}
-on relatively low difference in performance between log(tf) and tfidf}
-
-\bmcomment{Cite \url{http://qwone.com/~jason/writing/loocv.pdf} for 
-example use of log(tf)}
-
-\bmcomment{Preprocessed using method from 
-\url{http://web.ist.utl.pt/acardoso/docs/2007-phd-thesis.pdf}}
+symbols, etc.) and let features in $\mathbf{g}$ correspond to tfidf 
+for unigrams \citep{lan2006proposing}.
 
 The 20NG dataset consists of 18,846 documents, sorted by date, with
 60\% used for training.  Though the categories are roughly uniformly
@@ -425,82 +486,74 @@ distributed, the topics vary greatly in their relatedness, following a
 hierarchical labeling scheme (e.g., \emph{rec.autos} and
 \emph{rec.motorcycles} are likely more closely related than either to
 \emph{sci.space}).  This offers a way to measure the effectiveness of
-\ourmethod{} at learning ``ease'':   the less closely related two categories
-are, the greater the ease in learning to distinguish them.
+\ourmethod{} at learning ``ease'':   the less closely related two 
+categories are, the greater the ease in learning to distinguish them.
 
 The R52 dataset contains 9,100 documents; we use the ModApte split
 (70\% training).  The label distribution is skewed, with 43\% of
-documents assigned to \nascomment{name the topic here} and 37 topics
-receiving fewer than 50 examples.  \nascomment{maybe say something
-  here about why we think \ourmethod{} won't do as well here?}
+documents assigned to \emph{earn} and 37 topics
+receiving fewer than 50 examples.
 
 
 \subsection{Results}
-
-\bmcomment{All 20news table numbers are wrong.  Need to fix them after experiments rerun.}
 
 Table~\ref{accuraciesTable} shows the micro-averaged
 accuracies on the Reuters and 20 newsgroups tasks for the 
 SVM baseline model and versions of \ourmethod{} with
 different choices of normalization constants 
 $\mathbf{n}$ and incorrect prediction classes $\mathcal{S}$.  
-
-On 20NG, every variant of \ourmethod{} outperforms the baseline SVM.  Logical and
-expected variants of $\mathbf{n}$ outperform the na\"{i}ve version.
-$\unorderedS$ usually has a slight advantage over $\orderedS$
-\nascomment{please check carefully and that I marked these right in
-  the table; you had them reversed}.  This makes sense, given that we
-do not expect any asymmetry in the ease of resolving confusions
-between two labels, and $\orderedS$ introduces extra $\mathbf{e}$ parameters to be
-estimated.
-
-On R52, \ourmethod{} performs slightly worse than the SVM.  Inspecting
-the errors, we find that 53\% of the SVMs mistakes were on examples
-whose topics had ten or fewer test \nascomment{you mean training?}
-examples.  
-\nascomment{I didn't understand this at all:  there is no non-diagonal element in the confusion matrix with more than 10 
-mistakes.}
-  These observations suggest that many of the SVM baseline's mistakes
-come from infrequent labels rather than systematic conflations between certain
-label pairs, and further that all of the prediction error sets in the
-cost learning model will be small.  As a result, it is
-unlikely that rescaling costs, as done by \ourmethod{}, will have much
-benefit.  Fortunately, \ourmethod{} does not harm performance by more
-than 0.5\%.
-
-
-
-
+We had expected that \ourmethod{} would generalize better on
+each task, giving
+increased accuracy, but unfortunately, the accuracy of each 
+version of \ourmethod{} 
+is always approximately the same as the accuracy of 
+the SVM, which
+suggests that the learned cost-scaled
+margins did not allow \ourmethod{} to generalize better than 
+the 
+SVM's constant margin.  Nevertheless, we show in the next section
+that \ourmethod{} 
+learned cost functions that intuitively represent the distance
+or ease of distinguishing each pair of labels.
 
 \begin{table}[t]
 \caption{Micro-averaged accuracies of different
-  learners. \nascomment{helpful if you boldface the best result(s) in
-    each column}}
+  learners.}
 \label{accuraciesTable}
 \begin{center}
-\begin{tabular}{l|rrr|r}
-\multirow{2}{*}{\bf Learner} &  \multicolumn{3}{c|}{\bf 20NG} & \multirow{2}{*}{\bf{R52}} \\
-& \bf{full} & \bf{level 2}   & \bf{ level 1}   & 
+\begin{tabular}{l|rr|r}
+\multirow{2}{*}{\bf Learner}          &  \multicolumn{2}{c|}{\bf 20NG} & \multirow{2}{*}{\bf{R52}} \\
+                                      & \bf{full} & \bf{clusters}      & 
 \\ \hline 
-SVM         & 0.7760      & 0.8008                & 0.8654                & 0.9213 \\
-\ourmethod{}: $\orderedS$, none    & 0.8008      & 0.8259                & 0.8752                & 0.9213 \\ 
-\ourmethod{}:            $\unorderedS$, none  & 0.8011      & 0.8257                & 0.8751                & 0.9194 \\
-\ourmethod{}: $\orderedS$, logical    & 0.8024      & 0.8271                & 0.8769                & 0.9210 \\ 
-\ourmethod{}: $\unorderedS$, logical  & 0.8376      & 0.8631                & 0.9142                & 0.9159 \\
-\ourmethod{}:  $\orderedS$, expected    & 0.8303      & 0.8557                & 0.9092                & 0.9159 \\ 
-\ourmethod{}: $\unorderedS$, expected       & 0.8307      & 0.8558                & 0.9084                & 0.9171 \\
+SVM                                   & 0.834     & 0.920              & 0.945 \\
+\ourmethod{}: $\orderedS$, none       & 0.834     & 0.919              & 0.946 \\ 
+\ourmethod{}: $\unorderedS$, none     & 0.832     & 0.921              & 0.945 \\
+\ourmethod{}: $\orderedS$, logical    & 0.836     & 0.920              & 0.948 \\ 
+\ourmethod{}: $\unorderedS$, logical  & 0.830     & 0.919              & 0.948 \\
+\ourmethod{}: $\orderedS$, expected   & 0.830     & 0.920              & 0.949 \\ 
+\ourmethod{}: $\unorderedS$, expected & 0.820     & 0.911              & 0.946 \\
 \end{tabular}
 \end{center}
 \end{table}
 
 \subsection{Hierarchy and Ease}
 
+especially in the \textbf{clusters} column
+where only the misclassifications in easier prediction classes are
+penalized.
 
 The hierarchical structure of the 20 Newsgroups topics encodes a notion
 of distance between topics as distance within the hierarchy.  
 As
 noted above, we expect that more distant topics (in the hierarchy)
 should correspond to greater ease in distinguishing between them.
+
+The \textbf{full} column under 20 newsgroups shows the 
+accuracies computed over the full set of 20 category labels,
+and the \textbf{clusters} column shows the accuracies computed
+where all categories from a topic cluster shown in
+Figure~\ref{cluster} are treated as a single label.
+
 Note that \ourmethod{} does not take advantage of any information
 about the hierarchy.
 
@@ -530,48 +583,70 @@ type of hierarchical clustering is used.}
 
 % Learned hierarchy
 
+\begin{figure}
+     \begin{subfigure}[b]{0.30\textwidth}
 \begin{tikzpicture}
 \tikzset{font=\footnotesize}
 \tikzset{anchor=base}
-\tikzset{sibling distance=50pt}
+\tikzset{sibling distance=5pt}
+\tikzset{level distance=10pt}
 \tikzset{frontier/.style={distance from root=200}}
 \tikzset{grow=right}
-%\tikzset{every tree node/.style={anchor=base west}}
+\tikzset{every tree node/.style={anchor=base west}}
 \tikzset{edge from parent/.style={draw, edge from parent fork right}}
-\Tree [ [ the cat ] [ the dog ] ]
+\Tree [ rec.sport.hockey [ [ sci.space [ [ rec.motorcycles sci.med ] [ [ sci.electronics [ rec.autos misc.forsale ] ] [ comp.graphics [ comp.sys.mac.hardware [ comp.windows.x [ comp.os.ms-windows.misc comp.sys.ibm.pc.hardware ] ] ] ] ] ] ] [ [ sci.crypt [ [ rec.sport.baseball talk.politics.guns ] [ talk.politics.misc talk.politics.mideast ] ] ] [ soc.religion.christian [ talk.religion.misc alt.atheism ] ] ] ] ] 
+
 \end{tikzpicture}
-%
-%\begin{tikzpicture}[sloped]
-%\node (a) at (-6,0) {a};
-%\node (b) at (-3,0) {b};
-%\node (c) at (-0.5,0) {c};
-%\node (d) at (0.5,0) {d};
-%\node (e) at (2,0) {e};
-%\node (ab) at (-4.5,3) {};
-%\node (cd) at (0,1) {};
-%\node (cde) at (1,2) {};
-%\node (all) at (-1.5,5) {};
-% 
-%\draw  (a) |- (ab.center);
-%\draw  (b) |- (ab.center);
-%\draw  (c) |- (cd.center);
-%\draw  (d) |- (cd.center);
-%\draw  (e) |- (cde.center);
-%\draw  (cd.center) |- (cde.center);
-%\draw  (ab.center) |- (all.center);
-%\draw  (cde.center) |- (all.center);
-% 
-%\draw[->,-triangle 60] (-7,0) -- node[above]{distance} (-7,6);
-%\end{tikzpicture}
+
+\begin{tikzpicture}
+\tikzset{font=\footnotesize}
+\tikzset{anchor=base}
+\tikzset{sibling distance=5pt}
+\tikzset{level distance=10pt}
+\tikzset{frontier/.style={distance from root=200}}
+\tikzset{grow=right}
+\tikzset{every tree node/.style={anchor=base west}}
+\tikzset{edge from parent/.style={draw, edge from parent fork right}}
+\Tree [ [ [ rec.sport.hockey [ alt.atheism [ talk.religion.misc soc.religion.christian ] ] ] [ talk.politics.mideast [ [ sci.med [ talk.politics.misc rec.sport.baseball ] ] [ sci.crypt talk.politics.guns ] ] ] ] [ [ rec.motorcycles [ rec.autos misc.forsale ] ] [ [ [ comp.os.ms-windows.misc [ comp.sys.mac.hardware comp.sys.ibm.pc.hardware ] ] [ comp.graphics comp.windows.x ] ] [ sci.space sci.electronics ] ] ] ] 
+
+\end{tikzpicture}
+
+\begin{tikzpicture}
+\tikzset{font=\footnotesize}
+\tikzset{anchor=base}
+\tikzset{sibling distance=5pt}
+\tikzset{level distance=10pt}
+\tikzset{frontier/.style={distance from root=200}}
+\tikzset{grow=right}
+\tikzset{every tree node/.style={anchor=base west}}
+\tikzset{edge from parent/.style={draw, edge from parent fork right}}
+\Tree [ sci.crypt [ [ [ talk.politics.misc talk.politics.guns ] [ talk.politics.mideast [ alt.atheism [ talk.religion.misc soc.religion.christian ] ] ] ] [ rec.sport.hockey [ sci.space [ [ sci.med [ [ comp.windows.x comp.os.ms-windows.misc ] [ comp.graphics rec.sport.baseball ] ] ] [ [ rec.autos rec.motorcycles ] [ sci.electronics [ misc.forsale [ comp.sys.mac.hardware comp.sys.ibm.pc.hardware ] ] ] ] ] ] ] ] ] 
+\end{tikzpicture}
+
+\begin{tikzpicture}
+\tikzset{font=\footnotesize}
+\tikzset{anchor=base}
+\tikzset{sibling distance=5pt}
+\tikzset{level distance=10pt}
+\tikzset{frontier/.style={distance from root=200}}
+\tikzset{grow=right}
+\tikzset{every tree node/.style={anchor=base west}}
+\tikzset{edge from parent/.style={draw, edge from parent fork right}}
+\Tree [ [ comp.graphics comp.os.ms-windows.misc comp.sys.ibm.pc.hardware comp.sys.mac.hardware comp.windows.x ] [ rec.autos rec.motorcycles rec.sport.baseball rec.sport.hockey ] [ sci.crypt sci.electronics sci.med sci.space ] [ misc.forsale ] [ talk.politics.misc talk.politics.mideast talk.politics.guns ] [ alt.atheism soc.religion.christian talk.religion.misc ] ] 
+\end{tikzpicture}
 
 
 \section{Related Work}
 
-
+\bmcomment{Add footnote about relationship between norm in objective 
+and
+Mahalanobis norm (just for people in group who look at 
+this later)} \nascomment{not sure this is critical}
 
 \bmcomment{Here are some things to possibly write about:}
 
-Self-paced learning \citep{kumar2010self}.
+Self-paced learning \citep{kumar2010self}. \bmcomment{Note relationship
+between this and current objective}
 
 Curriculum Learning \citep{bengio2009curriculum}.
 
@@ -623,7 +698,10 @@ overall similarity of the training distribution to the ``true'' one.
 We believe it is an open theoretical question how these various
 notions might relate to learning guarantees.
 
+\bmcomment{Add recommendation about doing synthetic data experiments
+with more features}
 
+\bmcomment{Get rid of ns}
 
 %\subsubsection*{Acknowledgments}
 

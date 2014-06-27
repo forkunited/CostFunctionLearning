@@ -2,6 +2,13 @@ package cost.util;
 
 import ark.util.Properties;
 
+/**
+ * CostProperties loads in a cost.properties configuration
+ * file.
+ * 
+ * @author Bill McDowell
+ * 
+ */
 public class CostProperties extends Properties {
 	private String fakeDataDirPath;
 	private String experimentInputDirPath;

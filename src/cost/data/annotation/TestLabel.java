@@ -1,5 +1,11 @@
 package cost.data.annotation;
 
+/**
+ * TestLabel enumerates possible labels for synthetic data.
+ * 
+ * @author Bill McDowell
+ *
+ */
 public enum TestLabel {
 	L_0,
 	L_1,
