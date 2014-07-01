@@ -10,6 +10,7 @@
 \usepackage[sort&compress]{natbib}
 \usepackage{natbibspacing}
 \usepackage{multirow}
+\usepackage{subcaption}
 
 \usetikzlibrary{arrows}
 \usetikzlibrary{shapes, trees}
@@ -93,9 +94,12 @@ introduces explicit estimates of the ``ease'' of avoiding each type of
 error
 (for a particular model family).   For error types that are ``just too
 hard,'' our model is offered the possibility of giving up in favor of
-making other, less challenging predictions more accurately
+making other, less challenging predictions more accurately.
 
-
+In practice, we found that our current method performs with 
+approximately the same accuracy as a baseline SVM on text 
+classification tasks, but it is able learn cost functions
+that intuitively make sense.
 
 %\bmcomment{Might want to give some motivating examples? Not sure if that's
 %necessary or not. One example of multiclass domain, and one example where
@@ -103,10 +107,7 @@ making other, less challenging predictions more accurately
 
 % \bmcomment{Mention examples of measures of 'difficulty'? Cite.}
 
-\bmcomment{Modify this.}
-Our experiments with text classification show  scenarios where the method achieves
-performance improvements over a strong baseline.
-
+%
 
 \section{Background and Notation}
 
@@ -133,7 +134,7 @@ differences in costs between different kinds of mistakes, as found
 when $\mathcal{Y}$ is structured.  Let the cost function
 $\Delta:\mathcal{Y}\times\mathcal{Y}\rightarrow\mathbb{R}$  be such
 that $\Delta(y, y')$ is the cost of predicting $y$ when the correct
-label is $y'$.  We use the ``margin rescaling'' variant the multiclass SVM:
+label is $y'$.  We use the ``margin rescaling'' variant of the multiclass SVM:
 \begin{align}
  \min_{\boldsymbol{\xi}\geq 0, \mathbf{w}}
 \frac{\lambda}{2}\|\mathbf{w}\|_2^2+\frac{1}{m}\sum_{i=1}^N\xi_i 
@@ -239,7 +240,8 @@ v_S (\mathbf{w}, \mathbf{e}) \triangleq \left|\left\{ i  \in \{1,\ldots, D\} \mi
 \mathbf{e}^\top \mathbf{s}(y, y_i)\right) \in S\right\}\right| \label{eq:set}
 \end{equation}
 
-The intuition is that, when this set is large, it is because it is not easy for the
+The intuition is that, when $v_S(\mathbf{w},\mathbf{e})$ 
+is large, it is because it is not easy for the
 model to shrink.  Of course, we should also take into account 
 that the distribution of the data may make some errors more frequent,
 inflating the size of the set in Eq.~\ref{eq:set} even if $S$ is ``easy.''
@@ -303,26 +305,32 @@ Eq.~\ref{svmObjective}; it is a joint optimization of $\mathbf{w}$ and $\mathbf{
   \mathcal{Y}} f(x_i,y ; \mathbf{w}) + \mathbf{e}^\top \mathbf{s}(y, y_i)
 \end{equation}
 where $\mathbf{n}$ is the vector of upper bounds on prediction error
-frequencies and $\|\mathbf{e}\|_{\mathbf{n}}^2 = \sum_{S \in
-  \mathcal{S}} n_Se_S^2$.  The changes amount to (1) including
+frequencies and 
+$\|\mathbf{e}\|_{\mathbf{n}}^2 = \sum_{S \in
+  \mathcal{S}} n_Se_S^2$.\footnote{$\|\cdot\|_{\mathbf{n}}$ norm is
+  a Mahalanobis norm, as described in
+  \citep{mahalanobis1936generalized}.} 
+ The modification amounts to (1) including
 $\mathbf{e}$ as a free variable and (2) regularizing it with a quadratic
-penalty (second term in Eq.~\ref{costObjective}) and a linear penalty
+penalty (second term in Eq.~\ref{costObjective}) and a linear ``reward''
 (third term in Eq.~\ref{costObjective}).  The linear penalty selects
 which $e_S$ should be nonzero---equivalently, are not impossibly
 difficult. Setting $e_S=0$ amounts to giving up on $S$
-errors.\footnote{The meaning of 'giving up' is unclear.  It seems
+errors.\footnote{The meaning of ``giving up'' is unclear.  It seems
 that setting $e_S=0$ actually amounts to giving up on margin maximization,
 but not error minimization with respect to $S$, but we don't work 
 this out in detail.\bmcomment{Noah, do you understand
 this differently?}}
 
-Most importantly, Eq.~\ref{costObjective} is minimized at $\mathbf{e}$ 
-that matches Eq.~\ref{e-condition}.  To see this, we can find the 
-subdifferential $\partial C$ of the function $C$ minimized in
-Eq.~\ref{costObjective}, and consider the optimized ease values 
-$\mathbf{e}^*$
-for which $\mathbf{0}\in \partial C(\mathbf{w}^*,\mathbf{e}^*)$.  
-$\partial C$ is given by:
+Most importantly, Eq.~\ref{costObjective} is minimized at ease
+ $\mathbf{e}$ 
+that matches Eq.~\ref{e-condition}.  To see this, we define 
+$C(\mathbf{w},\mathbf{e})$ as the objective minimized in 
+Eq~\ref{costObjective}, and derive the optimal ease 
+values $\mathbf{e}^*$
+such that $\mathbf{0}\in \partial C(\mathbf{w}^*,\mathbf{e}^*)$.  
+The subdifferential $\partial C$ is given by:\footnote{See
+ \url{http://see.stanford.edu/materials/lsocoee364b/01-subgradients_notes.pdf} for help in understanding subgradients.}
 
 \begin{equation}
 \label{subdifferential}
@@ -335,16 +343,16 @@ $\partial C$ is given by:
 \end{split}
 \end{equation}
 
-Where addition, subtraction, and $\nabla$ are overloaded to perform sums,
-subtractions, and gradients over sets, 
-$\mathbf{Co}(\cdot)$ gives the convex hull of a
-set, and $F^{\Delta}_{\max}$ is defined as:
+Where addition and subtraction operators are overloaded to perform 
+additions and subtractions over sets, 
+$\mathbf{Co}(\cdot)$ gives the convex hull, and 
+$\nabla F^{\Delta}_{\max}$ is defined as:
 
 \begin{equation}
 \label{FmaxDef}
-F^{\Delta}_{\max}(x,y;\mathbf{w},\mathbf{e}) = 
-\{ f(x, \hat{y} ; \mathbf{w}) +
-\mathbf{e}^\top \mathbf{s}(y, \hat{y})
+\nabla F^{\Delta}_{\max}(x,y;\mathbf{w},\mathbf{e}) = 
+\{ \nabla f(x, \hat{y} ; \mathbf{w}) +
+\nabla \mathbf{e}^\top \mathbf{s}(y, \hat{y})
 | \hat{y}\in\argmax_{y' \in \mathcal{Y}} f(x, y' ; \mathbf{w}) +
 \mathbf{e}^\top \mathbf{s}(y, y') \}
 \end{equation}
@@ -398,7 +406,7 @@ $\mathbf{e}$ according to our intuitions from Section~\ref{sec:ease}.
 
 The appropriate choice for the normalization vector $\mathbf{n}$ in 
 Eq.~\ref{costObjective} depends on the prediction classes in
-$\mathcal{S}$ and the types of bias we seek to avoid in estimating $\mathbf{e}$.
+$\mathcal{S}$ and the types of bias we seek to avoid when estimating $\mathbf{e}$.
 For $\unorderedS$ and $\orderedS$, we are most concerned with
 unbalanced marginal distributions over labels.  
 Let $c_y$ be the frequency of the label $y$ in the training data,
@@ -432,41 +440,31 @@ model to estimate bounds on error counts.
 \section{Experiments}
 
 We implemented the multiclass SVM (Eq.~\ref{svmObjective}) and
-variations of our method, which we refer to as
-normalized cost learning (\ourmethod{}; Eq.~\ref{costObjective}), using
-stochastic  gradient descent (SGD) with a learning rate determined
-by AdaGrad \citep{yin2003stochastic}\citep{duchi2011adaptive}.
-We ran SGD for 50 passes over the data, using a
-random permutation each time.  We observed that during the last ten
+variations of our method---which we refer to as
+normalized cost learning (\ourmethod{}; Eq.~\ref{costObjective})---
+and we compared each of these implementations on standard text
+classification datasets in several experiments.  In each experiment, 
+we used a standard train/test split for the dataset, but with 10\% of
+the training set held out to perform a grid search for $\lambda$ over
+16 values in $[10^{-6}, 50]$, choosing the value that
+gives the best accuracy, and then fixing $\lambda$ and
+retraining on the whole training set.  For training,
+ran 
+stochastic gradient descent (SGD) with a learning rate determined
+by AdaGrad for 50 passes over random permutations of the data
+\citep{yin2003stochastic}\citep{duchi2011adaptive}.  We observed that 
+during the last ten
 passes, accuracy varied by $<
 0.01$ and fewer than 10\% of predictions changed.\footnote{
-We were originally running for 150 iterations for previous buggy
-versions, but we adjusted down to 50 iterations after we realized
-that these experiments were going to give a negative result.  It's
-extremely unlikely that increasing the number of iterations to 150 will
+We were running for 150 iterations for previous buggy
+versions of the models, but we adjusted down to 50 iterations 
+as our remaining working time began to dwindle, and we realized 
+that these experiments were going to give negative results.  It's
+ unlikely that increasing the number of iterations from 50 will
 change the current conclusions, but if this work is ever published,
-we might want to rerun other versions of the algorithm with a larger
-number of iterations--just to be safe.
+we might want to rerun the algorithms with more iterations---just 
+to be safe.
 }
-
-We ran several experiments to compare these models on standard text
-classification datasets/tasks, using conventional training/test splits.
-10\% of the training set is used in each case to perform a grid search
-for $\lambda$ over 16 values in $[10^{-6}, 50]$, choosing the one that
-gives the best accuracy, and then fixing $\lambda$ and
-training on the whole training set.\footnote{We also ran experiments
-on synthetic data sets, but the results for those experiments are similar
-to the results for the text-classification data sets, and 
-so they are not included in this document. Specifically, the synthetic data
-set results show at most minor performance gains on some versions of the data
-although the cost function seems to always be learned appropriately.
- See the code documentation
-at \url{https://github.com/forkunited/CostFunctionLearning/} for more 
-detail.}
-
-We consider six variations of \ourmethod{}, varying the prediction error sets
-($\unorderedS$; $\orderedS$) and normalization constants
-($\boldsymbol{1}$, i.e., none; logical; expected).
 
 \subsection{Datasets}
 
@@ -477,8 +475,28 @@ We considered two datasets with relatively large output label sets:
 \footnote{\url{http://www.csmining.org/index.php/r52-and-r8-of-reuters-21578.html}.}    
 We followed \citep{2007:phd-Ana-Cardoso-Cachopo} in
 preprocessing the text corpora (including downcasing, removing
-symbols, etc.) and let features in $\mathbf{g}$ correspond to tfidf 
-for unigrams \citep{lan2006proposing}.
+symbols, etc.), and we let features in $\mathbf{g}$ correspond to tf-idf 
+computed over unigrams \citep{lan2006proposing}.
+\footnote{We also ran experiments
+on synthetic data sets, but the results for those experiments are similar
+to the results for the text-classification data sets, and 
+so they are not included in this document. Specifically, the synthetic data
+set results show at most minor performance gains on some versions of the data
+although the cost function seems to be learned appropriately.
+Furthermore, the synthetic data includes only four features in each task,
+which is unrealistic, and causes SGD difficulty in convergence
+due to the model's predictions being super sensitive to 
+each weight.\bmcomment{Does this make sense?}  In the 
+future, it would be 
+beneficial
+to extend these datasets to include tasks with many more
+features,
+and use them to make sure our current cost learning models 
+are 
+functioning properly.
+ See the code documentation
+at \url{https://github.com/forkunited/CostFunctionLearning/} for more 
+detail on how to use and generate the synthetic data.}
 
 The 20NG dataset consists of 18,846 documents, sorted by date, with
 60\% used for training.  Though the categories are roughly uniformly
@@ -499,22 +517,18 @@ receiving fewer than 50 examples.
 
 Table~\ref{accuraciesTable} shows the micro-averaged
 accuracies on the Reuters and 20 newsgroups tasks for the 
-SVM baseline model and versions of \ourmethod{} with
-different choices of normalization constants 
-$\mathbf{n}$ and incorrect prediction classes $\mathcal{S}$.  
-We had expected that \ourmethod{} would generalize better on
-each task, giving
-increased accuracy, but unfortunately, the accuracy of each 
-version of \ourmethod{} 
-is always approximately the same as the accuracy of 
+SVM baseline model and \ourmethod{} with
+various prediction error classes
+($\unorderedS$; $\orderedS$) and normalization constants
+($\boldsymbol{1}$, i.e., none; logical; expected).  
+We had expected that \ourmethod{} might give an overall
+increase in accuracy on each task, but unfortunately, \ourmethod{} 
+generally gave approximately the same accuracy as  
 the SVM, which
 suggests that the learned cost-scaled
-margins did not allow \ourmethod{} to generalize better than 
+margins did not help \ourmethod{} to generalize better than 
 the 
-SVM's constant margin.  Nevertheless, we show in the next section
-that \ourmethod{} 
-learned cost functions that intuitively represent the distance
-or ease of distinguishing each pair of labels.
+SVM's constant margin.  
 
 \begin{table}[t]
 \caption{Micro-averaged accuracies of different
@@ -536,139 +550,236 @@ SVM                                   & 0.834     & 0.920              & 0.945 \
 \end{center}
 \end{table}
 
-\subsection{Hierarchy and Ease}
-
-especially in the \textbf{clusters} column
-where only the misclassifications in easier prediction classes are
-penalized.
-
-The hierarchical structure of the 20 Newsgroups topics encodes a notion
-of distance between topics as distance within the hierarchy.  
-As
-noted above, we expect that more distant topics (in the hierarchy)
-should correspond to greater ease in distinguishing between them.
-
-The \textbf{full} column under 20 newsgroups shows the 
-accuracies computed over the full set of 20 category labels,
-and the \textbf{clusters} column shows the accuracies computed
-where all categories from a topic cluster shown in
-Figure~\ref{cluster} are treated as a single label.
-
-Note that \ourmethod{} does not take advantage of any information
-about the hierarchy.
-
-Table~\ref{accuraciesTable} includes accuracies 
-computed when nearby topics in the hierarchy are are collapsed into
-single topics, either at the second level (i.e., into \nascomment{??}
-categories) or the first (i.e., into \nascomment{??} categories).
-The advantages of \ourmethod{} are nearly as great for these collapsed
-tasks as for the primary one, meaning that it is better than the SVM
-at distinguishing topics that are farther apart in the hierarchy, and
-therefore has learned a notion of ease that relates to hierarchy
-distance.
-
-
-\bmcomment{Fix the above paragraph when get new numbers}
-
-We checked this directly by using $\mathbf{e}$ to reconstruct the
-hierarchy by applying a hierarchical clustering algorithm. 
-
-\bmcomment{Cite hierarchical clustering.  Be specific about which
-type of hierarchical clustering is used.}
-
-\bmcomment{Add hierarchy figure.}
-
-
-\bmcomment{Add measurements of similarity between hierarchies}
-
-% Learned hierarchy
+We had especially hoped to see accuracy
+gains in the ``clusters'' column under ``20NG''.  Whereas the 
+``full'' column shows accuracies computed over all categories
+ in the 20 newsgroups task, the ``clusters'' column
+shows accuracies computed with all categories from a single
+topical cluster mapped to a single label---where the topical
+clusters are shown in Figure~\ref{clusters} and
+defined at \url{http://qwone.com/~jason/20Newsgroups/}.  
+Assuming
+\ourmethod{}'s learned cost function gives 
+higher costs for 
+mislabelings between topical clusters and lower 
+costs for mislabelings
+within topical clusters, we had 
+expected that the model would focus
+on adjusting its feature weights 
+to distinguish between categories
+in separate clusters, which would have 
+resulted in an overall increase in
+ accuracy in the ``clusters'' column.  
+ 
+We inspected the learned cost functions from 
+the $\unorderedS$ versions of \ourmethod{} 
+to check our assumption that the costs reflect the 
+relative ease of
+distinguishing between categories from separate topical 
+clusters in
+Figure~\ref{clusters}.  To observe the relationship between 
+the learned costs and the
+topical clusters, we constructed average linkage hierarchical 
+clusters (UPGMA)
+using the values of learned cost function weights $\mathbf{e}$ 
+as distances \citep{legendrenumerical}.  
+The resulting cost learned hierarchical clusters shown 
+in Figures~\ref{none-h}, \ref{logical-h}, 
+and \ref{expected-h} seem qualitatively similar to
+to the topical clusters in Figure~\ref{clusters}, suggesting
+that our assumption that the learned costs reflect
+the topical clusters is correct---at least approximately.
+\footnote{It's difficult to make a precise comparison between
+the cost learned hierarchies and the topical clusters due
+to the fact that hierarchical clustering only outputs 
+binary hierarchies, but the topical clusters do not form a
+ binary hierarchy.  It would be more appropriate to use
+ a method that outputs non-binary clusterings given a 
+ distance metric, but we did not have time to explore such
+ alternatives.
+ Nevertheless, the hierarchies that
+ we generated from learned costs still seem qualitatively
+ compelling.}  However, even if each learned cost function's
+ category hierarchy seems reasonable, it is difficult to 
+ see which normalization constants give the best
+ hierarchy.  Regardless, there is evidence that the normalization 
+ affects the learned $\mathbf{e}$ as expected from 
+ Eq~\ref{e-condition} in that the ``expected'' normalization
+ constants give components of $\mathbf{e}$ in $[0.759,1]$, the
+ ``logical'' constants give component of $\mathbf{e}$ in
+ $[0.907, 1]$, and the ``none'' constants gives components of
+ $\mathbf{e}$ in $[0.999,1]$.
 
 \begin{figure}
-     \begin{subfigure}[b]{0.30\textwidth}
+\centering
+\begin{subfigure}{.5\textwidth}
+\centering
 \begin{tikzpicture}
 \tikzset{font=\footnotesize}
 \tikzset{anchor=base}
-\tikzset{sibling distance=5pt}
-\tikzset{level distance=10pt}
-\tikzset{frontier/.style={distance from root=200}}
-\tikzset{grow=right}
-\tikzset{every tree node/.style={anchor=base west}}
-\tikzset{edge from parent/.style={draw, edge from parent fork right}}
-\Tree [ rec.sport.hockey [ [ sci.space [ [ rec.motorcycles sci.med ] [ [ sci.electronics [ rec.autos misc.forsale ] ] [ comp.graphics [ comp.sys.mac.hardware [ comp.windows.x [ comp.os.ms-windows.misc comp.sys.ibm.pc.hardware ] ] ] ] ] ] ] [ [ sci.crypt [ [ rec.sport.baseball talk.politics.guns ] [ talk.politics.misc talk.politics.mideast ] ] ] [ soc.religion.christian [ talk.religion.misc alt.atheism ] ] ] ] ] 
-
-\end{tikzpicture}
-
-\begin{tikzpicture}
-\tikzset{font=\footnotesize}
-\tikzset{anchor=base}
-\tikzset{sibling distance=5pt}
-\tikzset{level distance=10pt}
-\tikzset{frontier/.style={distance from root=200}}
-\tikzset{grow=right}
-\tikzset{every tree node/.style={anchor=base west}}
-\tikzset{edge from parent/.style={draw, edge from parent fork right}}
-\Tree [ [ [ rec.sport.hockey [ alt.atheism [ talk.religion.misc soc.religion.christian ] ] ] [ talk.politics.mideast [ [ sci.med [ talk.politics.misc rec.sport.baseball ] ] [ sci.crypt talk.politics.guns ] ] ] ] [ [ rec.motorcycles [ rec.autos misc.forsale ] ] [ [ [ comp.os.ms-windows.misc [ comp.sys.mac.hardware comp.sys.ibm.pc.hardware ] ] [ comp.graphics comp.windows.x ] ] [ sci.space sci.electronics ] ] ] ] 
-
-\end{tikzpicture}
-
-\begin{tikzpicture}
-\tikzset{font=\footnotesize}
-\tikzset{anchor=base}
-\tikzset{sibling distance=5pt}
-\tikzset{level distance=10pt}
-\tikzset{frontier/.style={distance from root=200}}
-\tikzset{grow=right}
-\tikzset{every tree node/.style={anchor=base west}}
-\tikzset{edge from parent/.style={draw, edge from parent fork right}}
-\Tree [ sci.crypt [ [ [ talk.politics.misc talk.politics.guns ] [ talk.politics.mideast [ alt.atheism [ talk.religion.misc soc.religion.christian ] ] ] ] [ rec.sport.hockey [ sci.space [ [ sci.med [ [ comp.windows.x comp.os.ms-windows.misc ] [ comp.graphics rec.sport.baseball ] ] ] [ [ rec.autos rec.motorcycles ] [ sci.electronics [ misc.forsale [ comp.sys.mac.hardware comp.sys.ibm.pc.hardware ] ] ] ] ] ] ] ] ] 
-\end{tikzpicture}
-
-\begin{tikzpicture}
-\tikzset{font=\footnotesize}
-\tikzset{anchor=base}
-\tikzset{sibling distance=5pt}
-\tikzset{level distance=10pt}
-\tikzset{frontier/.style={distance from root=200}}
+\tikzset{sibling distance=-5pt}
+\tikzset{level distance=5pt}
+\tikzset{frontier/.style={distance from root=75}}
 \tikzset{grow=right}
 \tikzset{every tree node/.style={anchor=base west}}
 \tikzset{edge from parent/.style={draw, edge from parent fork right}}
 \Tree [ [ comp.graphics comp.os.ms-windows.misc comp.sys.ibm.pc.hardware comp.sys.mac.hardware comp.windows.x ] [ rec.autos rec.motorcycles rec.sport.baseball rec.sport.hockey ] [ sci.crypt sci.electronics sci.med sci.space ] [ misc.forsale ] [ talk.politics.misc talk.politics.mideast talk.politics.guns ] [ alt.atheism soc.religion.christian talk.religion.misc ] ] 
 \end{tikzpicture}
+\caption{Topical Clusters}
+\label{clusters}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+\centering
+\begin{tikzpicture}
+\tikzset{font=\footnotesize}
+\tikzset{anchor=base}
+\tikzset{sibling distance=-5pt}
+\tikzset{level distance=5pt}
+\tikzset{frontier/.style={distance from root=75}}
+\tikzset{grow=right}
+\tikzset{every tree node/.style={anchor=base west}}
+\tikzset{edge from parent/.style={draw, edge from parent fork right}}
+\Tree [ rec.sport.hockey [ [ sci.space [ [ rec.motorcycles sci.med ] [ [ sci.electronics [ misc.forsale rec.autos ] ] [ comp.graphics [ comp.sys.mac.hardware [ comp.windows.x [ comp.sys.ibm.pc.hardware comp.os.ms-windows.misc ] ] ] ] ] ] ] [ [ soc.religion.christian [ alt.atheism talk.religion.misc ] ] [ sci.crypt [ [ talk.politics.guns rec.sport.baseball ] [ talk.politics.misc talk.politics.mideast ] ] ] ] ] ] 
+\end{tikzpicture}
+\caption{Learned $\unorderedS$, none}
+\label{none-h}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\centering
+\begin{tikzpicture}
+\tikzset{font=\footnotesize}
+\tikzset{anchor=base}
+\tikzset{sibling distance=-5pt}
+\tikzset{level distance=5pt}
+\tikzset{frontier/.style={distance from root=75}}
+\tikzset{grow=right}
+\tikzset{every tree node/.style={anchor=base west}}
+\tikzset{edge from parent/.style={draw, edge from parent fork right}}
+\Tree [ [ [ rec.sport.hockey [ alt.atheism [ talk.religion.misc soc.religion.christian ] ] ] [ talk.politics.mideast [ [ sci.med [ talk.politics.misc rec.sport.baseball ] ] [ sci.crypt talk.politics.guns ] ] ] ] [ [ rec.motorcycles [ rec.autos misc.forsale ] ] [ [ [ comp.os.ms-windows.misc [ comp.sys.mac.hardware comp.sys.ibm.pc.hardware ] ] [ comp.graphics comp.windows.x ] ] [ sci.space sci.electronics ] ] ] ] 
+\end{tikzpicture}
+\caption{Learned $\unorderedS$, logical}
+\label{logical-h}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+\centering
+\begin{tikzpicture}
+\tikzset{font=\footnotesize}
+\tikzset{anchor=base}
+\tikzset{sibling distance=-5pt}
+\tikzset{level distance=5pt}
+\tikzset{frontier/.style={distance from root=75}}
+\tikzset{grow=right}
+\tikzset{every tree node/.style={anchor=base west}}
+\tikzset{edge from parent/.style={draw, edge from parent fork right}}
+\Tree [ sci.crypt [ [ rec.sport.hockey [ sci.space [ [ sci.med [ [ comp.windows.x comp.os.ms-windows.misc ] [ rec.sport.baseball comp.graphics ] ] ] [ [ sci.electronics [ misc.forsale [ comp.sys.ibm.pc.hardware comp.sys.mac.hardware ] ] ] [ rec.autos rec.motorcycles ] ] ] ] ] [ [ talk.politics.guns talk.politics.misc ] [ talk.politics.mideast [ alt.atheism [ soc.religion.christian talk.religion.misc ] ] ] ] ] ] 
+\end{tikzpicture}
+\caption{Learned $\unorderedS$, expected}
+\label{expected-h}
+\end{subfigure}
+\caption{Clusterings of 20 Newsgroup categories.  \ref{clusters} shows
+the topical clusters suggested at \url{http://qwone.com/~jason/20Newsgroups/}.
+\ref{none-h}, \ref{logical-h}, and \ref{expected-h} show hierarchical
+clusterings constructed using distances from the ``ease'' $\mathbf{e}$ 
+learned by \ourmethod{} with $\unorderedS$ prediction classes and
+``none'' ($\mathbf{1}$), ``logical'', and ``expected'' normalization
+constants.}
+\label{hierarchies}
+\end{figure}
 
+\subsection{Discussion}
+
+Given that \ourmethod{}'s learned cost function approximates the 
+relative ease 
+of distinguishing between categories in separate topical clusters, 
+it is surprising that \ourmethod{} does not give an increased 
+accuracy over the SVM baseline in the ``clusters'' column of
+ Table~\ref{accuraciesTable}.
+This could be an artifact of the 20 newsgroups data set---for example,
+the SVM's choice of weights might be near optimal for 
+distinguishing between categories in separate topical clusters
+given its features, and so there might be nothing that \ourmethod{}
+can do to improve these weights. 
+
+Alternatively, it's possible that the \ourmethod{} adjusts its 
+weights given the learned costs in a sub-optimal way.  The baseline
+multiclass SVM from \citep{crammer2002algorithmic} generalizes the
+binary maximum margin-principle from \citep{vapnik1998statistical}
+in a way that does not preserve the binary principle's original geometric interpretation.\footnote{There may be an alternative
+multi-class SVM formulation which generalizes the
+ maximum-margin principle in
+way that preserves the original geometric interpretation from the 
+binary case.  One way to start thinking about this is to consider
+that the difference between feature weights for two classes in the 
+multi-class setting form a hyper-plane between those classes, and
+the margins around those planes can be maximized.
+However, there
+are $\binom{|\mathcal{Y}|}{2}$  such hyper-planes, but the current
+multi-class SVM only has
+$|\mathcal{Y}|$ sets of feature weights (one for each label), and
+so the adjustment of one of these planes and its margins has some
+effect on the others---not all choices of planes and margins are
+possible.  A new 
+generalized multi-class maximum margin principle might prescribe
+an optimal way to trade-off the margin sizes and errors 
+between all of the planes.  This new generalization might even
+involve some notion of learned cost, given that we want
+to more aggressively maximize the margins between classes which
+are more easily distinguishable. It's unclear at this 
+point how any of this would work in detail, and we also haven't
+reviewed the literature prior to \citep{crammer2002algorithmic}
+that attempted other generalizations of the SVM to multi-class 
+settings, so they it's possible that they tried something
+like this already.
+}
+Furthermore, \citep{tsochantaridis2004support} shows both  
+``slack-rescaling'' and ``margin-rescaling'' methods for incorporating
+the cost function into the SVM, and we've only experimented with
+the possibly inferior ``margin-rescaling'' method.  Investigations
+of the generalization from binary to multi-class, the generalization 
+from uniform to
+varying cost, and the interaction between these might suggest
+ways to use the cost learning to gain feature weights which generalize
+better.
+
+A third alternative possible cause for the lack of an accuracy gain by 
+\ourmethod{}
+is that learned costs do not give an accurate enough encoding of the
+ topical clusters, despite the fact that their derived hierarchies seem
+ to roughly reflect those clusters.  This failure might be corrected
+ through a better choice of normalization constants $\mathbf{n}$.
 
 \section{Related Work}
 
-\bmcomment{Add footnote about relationship between norm in objective 
-and
-Mahalanobis norm (just for people in group who look at 
-this later)} \nascomment{not sure this is critical}
+Here is a list of related work:\footnote{Add details if/when
+publishing.}
 
-\bmcomment{Here are some things to possibly write about:}
+\begin{enumerate}
 
-Self-paced learning \citep{kumar2010self}. \bmcomment{Note relationship
-between this and current objective}
+\item Self-paced learning \citep{kumar2010self}\footnote{The
+objective function used in self-paced learning provided 
+some inspiration
+for our objective function.}
 
-Curriculum Learning \citep{bengio2009curriculum}.
+\item Curriculum learning \citep{bengio2009curriculum}
 
-Confidence weighted learning \citep{dredze2008confidence}.
+\item Confidence weighted learning \citep{dredze2008confidence}
 
-Ed Hovy inter-annotator agreement cost \citep{plank2014learning}
+\item Inter-annotator agreement cost \citep{plank2014learning}
 
-Hidden variable learning by state splitting mentioned in 
-\url{http://www.cs.cmu.edu/~nasmith/papers/career-proposal-2010.pdf} 
-\citep{petrov2011coarse}.
+\item State splitting  \citep{petrov2011coarse}
 
-Finite state output encodings mentioned in 
-\url{http://www.cs.cmu.edu/~nasmith/papers/career-proposal-2010.pdf}
-\citep{loper2008encoding}
+\item Finite state output encodings \citep{loper2008encoding}
 
-\subsection{Future Work and Conclusions}
+\end{enumerate}
 
-\bmcomment{Is there anything else that I forgot?}
+Also, see \url{http://www.cs.cmu.edu/~nasmith/papers/career-proposal-2010.pdf} for more motivations for the cost function
+learning.
+
+\subsection{Future Work}
 
 In future work, richer representations of prediction error types
-($\mathcal{S}$) might be pursued.  For example, classes might be 
-constructed based on frequencies of classes, with the rarest labels forming
+($\mathcal{S}$) might be pursued.  For example, types might be 
+constructed based on frequencies of labels, with the rarest labels forming
 a group.  For structured output spaces such as natural language
 parsing, the domain might suggest
 groups of errors; post hoc analysis of $\mathbf{e}$ might, in turn,
@@ -698,10 +809,12 @@ overall similarity of the training distribution to the ``true'' one.
 We believe it is an open theoretical question how these various
 notions might relate to learning guarantees.
 
-\bmcomment{Add recommendation about doing synthetic data experiments
-with more features}
-
-\bmcomment{Get rid of ns}
+Finally, given our negative results on the text-classification data,
+it would be good to experiment with other datasets.  It would be useful
+to experiment with synthetic data to try to find out what the model
+is doing, or also consider datasets with an even larger number of 
+labels where there are even more places for the cost learning to make
+a difference.
 
 %\subsubsection*{Acknowledgments}
 
@@ -709,11 +822,6 @@ with more features}
 %acknowledgments go at the end of the paper. Do not include 
 %acknowledgments in the anonymized submission, only in the 
 %final paper. 
-
-\bmcomment{The 'references' heading given by the 
-bibliography command is the wrong size font.  Needs to
-be the size of a 'third level heading'.  How to change this?}
-\nascomment{maybe the problem comes from using natbib?}
 
 \bibliography{refs}
 

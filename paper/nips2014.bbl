@@ -28,6 +28,12 @@ Ben Taskar Carlos Guestrin~Daphne Koller.
 \newblock Max-margin markov networks.
 \newblock 2003.
 
+\bibitem{mahalanobis1936generalized}
+Prasanta~Chandra Mahalanobis.
+\newblock On the generalized distance in statistics.
+\newblock {\em Proceedings of the National Institute of Sciences (Calcutta)},
+  2:49--55, 1936.
+
 \bibitem{yin2003stochastic}
 G~George Yin and Harold~Joseph Kushner.
 \newblock {\em Stochastic approximation and recursive algorithms and
@@ -50,6 +56,11 @@ Ana Cardoso-Cachopo.
 Man Lan, Chew~Lim Tan, and Hwee-Boon Low.
 \newblock Proposing a new term weighting scheme for text categorization.
 \newblock In {\em AAAI}, volume~6, pages 763--768, 2006.
+
+\bibitem{legendrenumerical}
+P~Legendre and L~Legendre.
+\newblock Numerical ecology, 1998.
+\newblock {\em 2nd English edition}, page 853.
 
 \bibitem{kumar2010self}
 M~Pawan Kumar, Benjamin Packer, and Daphne Koller.
