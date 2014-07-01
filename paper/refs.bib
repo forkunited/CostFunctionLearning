@@ -5,35 +5,32 @@
 @inproceedings{tsochantaridis2004support,
   title={Support vector machine learning for interdependent and structured output spaces},
   author={Tsochantaridis, Ioannis and Hofmann, Thomas and Joachims, Thorsten and Altun, Yasemin},
-  booktitle={Proceedings of the twenty-first international conference on Machine learning},
-  pages={104},
-  year={2004},
-  organization={ACM}
+  booktitle={Proceedings of ICML},
+  year={2004}
 }
 
 % Structured SVM/margin rescaling
-@article{koller2003max,
+@inproceedings{koller2003max,
   title={Max-margin Markov networks},
-  author={Koller, Ben Taskar Carlos Guestrin Daphne},
-  year={2003}
+  author={ Ben Taskar and Carlos Guestrin and Daphne Koller},
+  year={2003},
+  booktitle = {NIPS}
 }
 
 % Structured Perceptron
 @inproceedings{collins2002discriminative,
-  title={Discriminative training methods for hidden markov models: Theory and experiments with perceptron algorithms},
+  title={Discriminative training methods for hidden {M}arkov models: Theory and experiments with perceptron algorithms},
   author={Collins, Michael},
-  booktitle={Proceedings of the ACL-02 conference on Empirical methods in natural language processing-Volume 10},
-  pages={1--8},
-  year={2002},
-  organization={Association for Computational Linguistics}
+  booktitle={Proceedings of EMNLP},
+  year={2002}
 }
 
 % Binary SVM
-@misc{vapnik1998statistical,
-  title={Statistical learning theory (adaptive and learning systems for signal processing, communications and control series)},
-  author={Vapnik, Vladimir N},
+@book{vapnik1998statistical,
+  title={Statistical Learning Theory},
+  author={Vapnik, Vladimir N.},
   year={1998},
-  publisher={John Wiley \& Sons, New York. A Wiley-Interscience Publication}
+  publisher={Wiley}
 }
 
 % Multiclass SVM
@@ -43,16 +40,13 @@
   journal={The Journal of Machine Learning Research},
   volume={2},
   pages={265--292},
-  year={2002},
-  publisher={JMLR. org}
-}
+  year={2002}}
 
 % Also Multiclass SVM
-@techreport{weston1998multi,
+@misc{weston1998multi,
   title={Multi-class support vector machines},
   author={Weston, Jason and Watkins, Chris},
   year={1998},
-  institution={Citeseer}
 }
 
 % SGD algorithm implementation/learning rate (Pegasos)
@@ -70,7 +64,7 @@
 % SGD more generally
 @book{yin2003stochastic,
   title={Stochastic approximation and recursive algorithms and applications},
-  author={Yin, G George and Kushner, Harold Joseph},
+  author={Yin, G. George and Kushner, Harold Joseph},
   year={2003},
   publisher={Springer}
 }
@@ -78,11 +72,9 @@
 % Self paced learning
 % Inspiration for objective function (select cost weights to turn on)
 @inproceedings{kumar2010self,
-  title={Self-Paced Learning for Latent Variable Models.},
-  author={Kumar, M Pawan and Packer, Benjamin and Koller, Daphne},
+  title={Self-Paced Learning for Latent Variable Models},
+  author={Kumar, M. Pawan and Packer, Benjamin and Koller, Daphne},
   booktitle={NIPS},
-  volume={1},
-  pages={3},
   year={2010}
 }
 
@@ -90,20 +82,16 @@
 @inproceedings{bengio2009curriculum,
   title={Curriculum learning},
   author={Bengio, Yoshua and Louradour, J{\'e}r{\^o}me and Collobert, Ronan and Weston, Jason},
-  booktitle={Proceedings of the 26th annual international conference on machine learning},
-  pages={41--48},
-  year={2009},
-  organization={ACM}
+  booktitle={Proceedings of ICML},
+  year={2009}
 }
 
 % Confidence weighted learning
 @inproceedings{dredze2008confidence,
   title={Confidence-weighted linear classification},
   author={Dredze, Mark and Crammer, Koby and Pereira, Fernando},
-  booktitle={Proceedings of the 25th international conference on Machine learning},
-  pages={264--271},
-  year={2008},
-  organization={ACM}
+  booktitle={Proceedings of ICML},
+  year={2008}
 }
 
 % Hidden variable learning by state splitting
@@ -148,18 +136,16 @@
 @inproceedings{lan2006proposing,
   title={Proposing a new term weighting scheme for text categorization},
   author={Lan, Man and Tan, Chew Lim and Low, Hwee-Boon},
-  booktitle={AAAI},
-  volume={6},
-  pages={763--768},
+  booktitle={Proceedings of AAAI},
   year={2006}
 }
 
 % Text-categorization preprocessing
-@Misc{2007:phd-Ana-Cardoso-Cachopo,
+@phdthesis{2007:phd-Ana-Cardoso-Cachopo,
   author =	 {Ana Cardoso-Cachopo},
   title =	 {{Improving Methods for Single-label Text
                   Categorization}},
-  howpublished = {PdD Thesis, Instituto Superior Tecnico, Universidade
+  school = {Instituto Superior Tecnico, Universidade
                   Tecnica de Lisboa},
   year =	 2007
 }
@@ -176,11 +162,13 @@
 }
 
 % Hierarchical clustering
-@article{legendrenumerical,
-  title={Numerical ecology, 1998},
-  author={Legendre, P and Legendre, L},
-  journal={2nd English edition},
-  pages={853}
+@book{legendrenumerical,
+  title={Numerical ecology},
+  author={Legendre, Pierre and Legendre, Loic FJ},
+  volume={20},
+  year={2012},
+  publisher={Elsevier}
+}
 }
 
 % Mahalanobis norm
@@ -191,4 +179,17 @@
   volume={2},
   pages={49--55},
   year={1936}
+}
+
+@misc{subgradients,
+title = {Subgradients},
+note = {\url{http://see.stanford.edu/materials/lsocoee364b/01-subgradients_notes.pdf}},
+author = {S. Boyd and  L. Vandenberghe},
+year = {2008}}
+
+@inproceedings{xing2002distance,
+  title={Distance metric learning with application to clustering with side-information},
+  author={Xing, Eric P. and Jordan, Michael I. and Russell, Stuart and Ng, Andrew Y.},
+  booktitle={NIPS},
+  year={2002}
 }

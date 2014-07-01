@@ -1,9 +1,9 @@
 \begin{thebibliography}{10}
 
 \bibitem{vapnik1998statistical}
-Vladimir~N Vapnik.
-\newblock Statistical learning theory (adaptive and learning systems for signal
-  processing, communications and control series), 1998.
+Vladimir~N. Vapnik.
+\newblock {\em Statistical Learning Theory}.
+\newblock Wiley, 1998.
 
 \bibitem{crammer2002algorithmic}
 Koby Crammer and Yoram Singer.
@@ -13,20 +13,18 @@ Koby Crammer and Yoram Singer.
 
 \bibitem{weston1998multi}
 Jason Weston and Chris Watkins.
-\newblock Multi-class support vector machines.
-\newblock Technical report, Citeseer, 1998.
+\newblock Multi-class support vector machines, 1998.
 
 \bibitem{tsochantaridis2004support}
 Ioannis Tsochantaridis, Thomas Hofmann, Thorsten Joachims, and Yasemin Altun.
 \newblock Support vector machine learning for interdependent and structured
   output spaces.
-\newblock In {\em Proceedings of the twenty-first international conference on
-  Machine learning}, page 104. ACM, 2004.
+\newblock In {\em Proceedings of ICML}, 2004.
 
 \bibitem{koller2003max}
-Ben Taskar Carlos Guestrin~Daphne Koller.
+Ben Taskar, Carlos Guestrin, and Daphne Koller.
 \newblock Max-margin markov networks.
-\newblock 2003.
+\newblock In {\em NIPS}, 2003.
 
 \bibitem{mahalanobis1936generalized}
 Prasanta~Chandra Mahalanobis.
@@ -34,8 +32,20 @@ Prasanta~Chandra Mahalanobis.
 \newblock {\em Proceedings of the National Institute of Sciences (Calcutta)},
   2:49--55, 1936.
 
+\bibitem{collins2002discriminative}
+Michael Collins.
+\newblock Discriminative training methods for hidden {M}arkov models: Theory
+  and experiments with perceptron algorithms.
+\newblock In {\em Proceedings of EMNLP}, 2002.
+
+\bibitem{subgradients}
+S.~Boyd and L.~Vandenberghe.
+\newblock Subgradients, 2008.
+\newblock
+  \url{http://see.stanford.edu/materials/lsocoee364b/01-subgradients_notes.pdf}.
+
 \bibitem{yin2003stochastic}
-G~George Yin and Harold~Joseph Kushner.
+G.~George Yin and Harold~Joseph Kushner.
 \newblock {\em Stochastic approximation and recursive algorithms and
   applications}.
 \newblock Springer, 2003.
@@ -48,36 +58,34 @@ John Duchi, Elad Hazan, and Yoram Singer.
 
 \bibitem{2007:phd-Ana-Cardoso-Cachopo}
 Ana Cardoso-Cachopo.
-\newblock {Improving Methods for Single-label Text Categorization}.
-\newblock PdD Thesis, Instituto Superior Tecnico, Universidade Tecnica de
+\newblock {\em {Improving Methods for Single-label Text Categorization}}.
+\newblock PhD thesis, Instituto Superior Tecnico, Universidade Tecnica de
   Lisboa, 2007.
 
 \bibitem{lan2006proposing}
 Man Lan, Chew~Lim Tan, and Hwee-Boon Low.
 \newblock Proposing a new term weighting scheme for text categorization.
-\newblock In {\em AAAI}, volume~6, pages 763--768, 2006.
+\newblock In {\em Proceedings of AAAI}, 2006.
 
 \bibitem{legendrenumerical}
-P~Legendre and L~Legendre.
-\newblock Numerical ecology, 1998.
-\newblock {\em 2nd English edition}, page 853.
+Pierre Legendre and Loic~FJ Legendre.
+\newblock {\em Numerical ecology}, volume~20.
+\newblock Elsevier, 2012.
 
 \bibitem{kumar2010self}
-M~Pawan Kumar, Benjamin Packer, and Daphne Koller.
+M.~Pawan Kumar, Benjamin Packer, and Daphne Koller.
 \newblock Self-paced learning for latent variable models.
-\newblock In {\em NIPS}, volume~1, page~3, 2010.
+\newblock In {\em NIPS}, 2010.
 
 \bibitem{bengio2009curriculum}
 Yoshua Bengio, J{\'e}r{\^o}me Louradour, Ronan Collobert, and Jason Weston.
 \newblock Curriculum learning.
-\newblock In {\em Proceedings of the 26th annual international conference on
-  machine learning}, pages 41--48. ACM, 2009.
+\newblock In {\em Proceedings of ICML}, 2009.
 
 \bibitem{dredze2008confidence}
 Mark Dredze, Koby Crammer, and Fernando Pereira.
 \newblock Confidence-weighted linear classification.
-\newblock In {\em Proceedings of the 25th international conference on Machine
-  learning}, pages 264--271. ACM, 2008.
+\newblock In {\em Proceedings of ICML}, 2008.
 
 \bibitem{plank2014learning}
 Barbara Plank, Dirk Hovy, and Anders S{\o}gaard.
@@ -93,6 +101,12 @@ Slav Petrov.
 Edward Loper.
 \newblock {\em Encoding structured output values}.
 \newblock PhD thesis, University of Pennsylvania, 2008.
+
+\bibitem{xing2002distance}
+Eric~P. Xing, Michael~I. Jordan, Stuart Russell, and Andrew~Y. Ng.
+\newblock Distance metric learning with application to clustering with
+  side-information.
+\newblock In {\em NIPS}, 2002.
 
 \bibitem{mukherjee2006learning}
 Sayan Mukherjee, Partha Niyogi, Tomaso Poggio, and Ryan Rifkin.
