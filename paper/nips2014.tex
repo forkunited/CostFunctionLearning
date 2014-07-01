@@ -325,13 +325,7 @@ errors.\footnote{We use the term ``giving up'' loosely.  Setting
   $e_S=0$ implies a reversion to a cost-unaware hinge loss as found in
   the structured perceptron \citep{collins2002discriminative}.  The
   learner will become less concerned with $S$ errors, relative to
-  others, but it will still try to improve the score of the observed output.
-%The meaning of ``giving up'' is unclear.  It seems
-%that setting $e_S=0$ actually amounts to giving up on margin maximization,
-%but not error minimization with respect to $S$, but we don't work 
-%this out in detail.\bmcomment{Noah, do you understand
-%this differently?}
-\nascomment{please check this}}
+  others, but it will still try to improve the score of the observed output.}
 
 Most importantly, Eq.~\ref{costObjective} is minimized at ease
  $\mathbf{e}$ 
@@ -537,7 +531,7 @@ various prediction error classes
 approximately the same accuracy as  
 the SVM.  A difference is not even apparent when we consider a less
 strict accuracy measure that does not penalize errors within
-higher-level clusters. \nascomment{condensed a lot here, please check}
+the topical clusters.
 
 \begin{table}[t]
 \caption{Micro-averaged accuracies of different
@@ -699,7 +693,7 @@ constants.
 \subsection{Discussion}
 
 Given that \ourmethod{}'s learned cost function seems to align well
-with the hierarchical nature of the categories,
+with the hierarchical nature of the 20NG categories,
 it is surprising that \ourmethod{} does not give an increased 
 accuracy over the SVM baseline in the ``clusters'' column of
  Table~\ref{accuraciesTable}.
