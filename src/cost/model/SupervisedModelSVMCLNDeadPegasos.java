@@ -18,6 +18,25 @@ import ark.model.SupervisedModel;
 import ark.util.Pair;
 import ark.util.SerializationUtil;
 
+/**
+ * SupervisedModelSVMCLNDeadPegasos is an implementation of the
+ * cost learning SVM described in paper/nips2014.pdf that
+ * uses the Pegasos SGD described at
+ * http://ttic.uchicago.edu/~nati/Publications/PegasosMPB.pdf
+ * to minimize the objective function.  This implementation
+ * is correct except that the 1/(lambda * t) learning
+ * rate is used on both the feature weights and the bias
+ * terms.  Putting the lambda in the learning rate for the
+ * bias terms results in incorrect biases.
+ * 
+ * @author Bill McDowell
+ *
+ * @param <D> datum type
+ * @param <L> label type
+ * 
+ * @deprecated Use cost.model.SupervisedModelSVMCLN instead.
+ *
+ */
 public class SupervisedModelSVMCLNDeadPegasos<D extends Datum<L>, L> extends SupervisedModelSVMDeadPegasos<D, L> {
 	protected FactoredCost<D, L> factoredCost;
 	protected double[] cost_v;

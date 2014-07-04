@@ -20,7 +20,24 @@ import ark.util.OutputWriter;
 import ark.util.Pair;
 import ark.util.SerializationUtil;
 
-// NOTE: This version uses pegasos algorithm. Learning rate screws up bias term.  Gah.
+/**
+ * SupervisedModelSVMDeadPegasos is an SVM implementation
+ * uses the Pegasos SGD described at
+ * http://ttic.uchicago.edu/~nati/Publications/PegasosMPB.pdf
+ * to minimize the objective function.  This implementation
+ * is correct except that the 1/(lambda * t) learning
+ * rate is used on both the feature weights and the bias
+ * terms.  Putting the lambda in the learning rate for the
+ * bias terms results in incorrect biases.
+ * 
+ * @author Bill McDowell
+ *
+ * @param <D> datum type
+ * @param <L> label type
+ * 
+ * @deprecated Use ark.model.SupervisedModelSVM instead.
+ *
+ */
 public class SupervisedModelSVMDeadPegasos<D extends Datum<L>, L> extends SupervisedModel<D, L> {
 	protected BidirectionalLookupTable<L, Integer> labelIndices;
 	protected int trainingIterations;

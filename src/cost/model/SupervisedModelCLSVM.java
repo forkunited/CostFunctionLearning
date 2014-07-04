@@ -12,6 +12,24 @@ import ark.data.annotation.Datum;
 import ark.data.feature.FeaturizedDataSet;
 import ark.model.SupervisedModel;
 
+/**
+ * SupervisedModelCLSVM is an implementation of a 
+ * cost learning SVM that minimizes objective function (1) from the
+ * paper/previous-approaches.pdf 
+ * document. This implementation is deprecated as it extends from
+ * the deprecated cost.model.SupervisedModelCL. 
+ * 
+ * @author Bill McDowell
+ *
+ * @param <D> datum type
+ * @param <L> label type
+ * 
+ * @deprecated There is currently no recently implemented cost
+ * learning SVM that minimizes objective function (1) from 
+ * paper/previous-approaches.pdf.  If you want one, then you should
+ * implement it by extending ark.model.SupervisedModelSVM. 
+ *
+ */
 public class SupervisedModelCLSVM<D extends Datum<L>, L> extends SupervisedModelCL<D, L> {	
 	private CostWeightComparator costWeightComparator;
 	protected double[] feature_g;

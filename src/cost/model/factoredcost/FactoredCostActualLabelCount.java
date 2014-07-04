@@ -11,6 +11,22 @@ import ark.data.annotation.Datum.Tools;
 import ark.data.feature.FeaturizedDataSet;
 import ark.model.SupervisedModel;
 
+/**
+ * FactoredCostActualLabelCount factors a cost
+ * function by sets of incorrect predictions (represented
+ * in paper/nips2014.pdf as the vector labeled 's'), where each
+ * set consists of incorrect predictions for which the actual
+ * datum label appears a certain number of times across
+ * all datums within the training set.
+ * 
+ * See cost.model.factoredcost.FactoredCost for generic documentation
+ * on FactoredCosts including this one.
+ * 
+ * @author Bill McDowell
+ *
+ * @param <D> datum type
+ * @param <L> label type
+ */
 public class FactoredCostActualLabelCount<D extends Datum<L>, L> extends FactoredCost<D, L> {	
 	private String[] parameterNames = { "c" };
 	private double c;

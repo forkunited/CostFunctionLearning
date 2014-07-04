@@ -20,6 +20,28 @@ import ark.util.OutputWriter;
 import cost.data.annotation.TestDatum;
 import cost.data.annotation.TestLabel;
 
+/**
+ * ConstructFakeData takes arguments:
+ * 
+ * [examplesPerFeatureCombination] - Number of examples per combination of feature values
+ * [numFeatures] - Number of features
+ * [randomSeed] - Seed for random numbers
+ * [modelPath] - Path to serialized model that gives a distribution by which to generate the data
+ * [outputPath] - Path to output file where to write the data
+ * 
+ * And generates a file at [outputPath] containing synthetic featurized data
+ * with [numFeatures] per example and labels generated according to the
+ * distribution specified by the model at [modelPath], sampled using a random number
+ * generator with seed [randomSeed].  The data set will
+ * contain examples for every possible combination of feature values {1, -1},
+ * and there will be [examplesPerFeatureCombination] examples of each combination.
+ * 
+ * Example models from which to generate the data are given in the 
+ * 'syntheticDataModels' directory.
+ * 
+ * @author Bill McDowell
+ *
+ */
 public class ConstructFakeData {
 	public static void main(String[] args) {
 		int examplesPerFeatureCombination = Integer.valueOf(args[0]);
@@ -31,7 +53,7 @@ public class ConstructFakeData {
 		OutputWriter output = new OutputWriter();
 		DataTools dataTools = new DataTools(output);
 		TestDatum.Tools datumTools = new TestDatum.Tools(dataTools);
-		SupervisedModel<TestDatum, TestLabel> model = datumTools.makeModelInstance("SVMCostLearner");
+		SupervisedModel<TestDatum, TestLabel> model = datumTools.makeModelInstance("SVMCLN");
 		try {
 			BufferedReader reader = FileUtil.getFileReader(modelPath);
 			if (!model.deserialize(reader, true, true, datumTools, null)) {

@@ -10,6 +10,22 @@ import ark.data.annotation.Datum.Tools;
 import ark.data.feature.FeaturizedDataSet;
 import ark.model.SupervisedModel;
 
+/**
+ * FactoredCostLabel factors a cost
+ * function by sets of incorrect predictions (represented
+ * in paper/nips2014.pdf as the vector labeled 's'), where each
+ * set contains predictions of one predicted label or
+ * predictions of one actual label.  Whether predicted or actual
+ * labels are used is determined by the 'FactorMode'.
+ * 
+ * See cost.model.factoredcost.FactoredCost for generic documentation
+ * on FactoredCosts including this one.
+ * 
+ * @author Bill McDowell
+ *
+ * @param <D> datum type
+ * @param <L> label type
+ */
 public class FactoredCostLabel<D extends Datum<L>, L> extends FactoredCost<D, L> {
 	public enum FactorMode {
 		ACTUAL,

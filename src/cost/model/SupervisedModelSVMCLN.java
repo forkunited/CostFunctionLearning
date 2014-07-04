@@ -19,10 +19,21 @@ import ark.model.SupervisedModelSVM;
 import ark.util.Pair;
 import ark.util.SerializationUtil;
 
+/**
+ * SupervisedModelSVMCLN is an implementation of the cost
+ * learning SVM described in paper/nips2014.pdf which uses
+ * Adagrad with sparse occasional updates during training.
+ * 
+ * @author Bill McDowell
+ *
+ * @param <D> datum type
+ * @param <L> label type
+ *
+ */
 public class SupervisedModelSVMCLN<D extends Datum<L>, L> extends SupervisedModelSVM<D, L> {
-	protected FactoredCost<D, L> factoredCost;
-	protected double[] cost_v;
-	protected double[] cost_G;
+	protected FactoredCost<D, L> factoredCost; // 's' vector from the paper/nips2014.pdf paper
+	protected double[] cost_v; // 'e' vector from paper/nips2014.pdf; 'v' from paper/previous-approaches.pdf
+	protected double[] cost_G; // G for AdaGrad
 	
 	public SupervisedModelSVMCLN() {
 		super();
@@ -76,6 +87,11 @@ public class SupervisedModelSVMCLN<D extends Datum<L>, L> extends SupervisedMode
 	}
 	
 	@Override
+	/**
+	 * Perform a single weight update for SGD.  This just performs the same
+	 * update to the feature weights as the non-cost learning SVM plus an update to 
+	 * the cost weights.
+	 */
 	protected boolean trainOneDatum(D datum, L datumLabel, L bestLabel, int iteration, FeaturizedDataSet<D, L> data) {
 		int N = data.size();
 		
@@ -138,6 +154,10 @@ public class SupervisedModelSVMCLN<D extends Datum<L>, L> extends SupervisedMode
 		return value;
 	}
 	
+	/**
+	 * Computes the label score in the same way as the SVM, optionally also including
+	 * the cost term
+	 */
 	protected double scoreLabel(FeaturizedDataSet<D, L> data, D datum, L label, boolean includeCost) {
 		double score = super.scoreLabel(data, datum, label, false);
 

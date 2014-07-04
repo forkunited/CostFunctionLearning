@@ -20,6 +20,13 @@ import cost.data.annotation.TestLabel;
 import cost.model.factoredcost.FactoredCost;
 import cost.util.CostProperties;
 
+/**
+ * Scratch is a scratch space in which to perform miscellaneous
+ * throw-away tasks. Feel free to delete the code here and replace
+ * it with other snippets you'd like to try.
+ * 
+ * @author Bill McDowell
+ */
 public class Scratch {
 	public static void main(String[] args) {
 		String dataSetName = args[0];

@@ -22,7 +22,22 @@ import ark.util.OutputWriter;
 import ark.util.Pair;
 import ark.util.SerializationUtil;
 
-// NOTE: This version slow because no "occasional" updates
+/**
+ * SupervisedModelSVMAda is an implementation of an SVM
+ * that uses Adagrad to minimize the hinge loss.  This 
+ * implementation is slow because it does not use sparse
+ * updates.  The newer ark.model.SupervisedModelSVM 
+ * is a newer improved implementation that uses sparse 
+ * updates.
+ * 
+ * @author Bill McDowell
+ *
+ * @param <D> datum type
+ * @param <L> label type
+ * 
+ * @deprecated Use ark.model.SupervisedModelSVM instead.
+ *
+ */
 public class SupervisedModelSVMAda<D extends Datum<L>, L> extends SupervisedModel<D, L> {
 	protected BidirectionalLookupTable<L, Integer> labelIndices;
 	protected int trainingIterations;

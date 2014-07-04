@@ -10,6 +10,21 @@ import ark.data.feature.Feature;
 import ark.data.feature.FeaturizedDataSet;
 import ark.model.SupervisedModel;
 
+/**
+ * FactoredCostFeature factors a cost
+ * function by sets of incorrect predictions (represented
+ * in paper/nips2014.pdf as the vector labeled 's'), where each
+ * set consists of incorrect predictions for which a given
+ * feature takes on a non-zero value.
+ * 
+ * See cost.model.factoredcost.FactoredCost for generic documentation
+ * on FactoredCosts including this one.
+ * 
+ * @author Bill McDowell
+ *
+ * @param <D> datum type
+ * @param <L> label type
+ */
 public class FactoredCostFeature<D extends Datum<L>, L> extends FactoredCost<D, L> {
 	private String featureReference;
 	private double c;

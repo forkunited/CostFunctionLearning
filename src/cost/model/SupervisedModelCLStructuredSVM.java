@@ -20,6 +20,25 @@ import ark.model.SupervisedModel;
 import ark.util.Pair;
 import ark.util.SerializationUtil;
 
+/**
+ * SupervisedModelCLStructuredSVM is an implementation of a structured 
+ * cost learning SVM that minimizes a structured version of 
+ * objective function (1) in the paper/previous-approaches.pdf 
+ * document. This implementation is deprecated as it extends from
+ * the deprecated cost.model.SupervisedModelCL. 
+ * 
+ * @author Bill McDowell
+ *
+ * @param <D> datum type
+ * @param <L> label type
+ * 
+ * @deprecated Use ark.model.SupervisedModelSVMStructured as a
+ * structured SVM instead.  There is currently no recently implemented
+ * structured cost learning SVM, and so if you want one, then you should
+ * implement it by extending either ark.model.SupervisedModelSVM or
+ * ark.model.SupervisedModelSVMStructured, depending on how you design it.
+ *
+ */
 public class SupervisedModelCLStructuredSVM<D extends Datum<L>, L> extends SupervisedModelCL<D, L> {	
 	private CostWeightComparator costWeightComparator;
 	protected double[] feature_g;

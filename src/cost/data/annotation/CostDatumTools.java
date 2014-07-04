@@ -3,11 +3,6 @@ package cost.data.annotation;
 import java.util.HashMap;
 import java.util.Map;
 
-import cost.model.SupervisedModelCLSVM;
-import cost.model.SupervisedModelCLSVMAlt;
-import cost.model.SupervisedModelCLSVMN;
-import cost.model.SupervisedModelCLSVMPlusStructure;
-import cost.model.SupervisedModelCLStructuredSVM;
 import cost.model.SupervisedModelSVMCLN;
 import cost.model.factoredcost.FactoredCost;
 import cost.model.factoredcost.FactoredCostActualLabelCount;
@@ -19,13 +14,11 @@ import cost.model.factoredcost.FactoredCostLabelPairUnordered;
 
 import ark.data.DataTools;
 import ark.data.annotation.Datum;
-import ark.model.SupervisedModelPartition;
-import ark.model.SupervisedModelSVMStructured;
 
 /**
  * CostDatumTools contains cost function learning tools for manipulating
- * data sets.  An instance of this class can be used to instantiate cost
- * function learning models for a given type of datum.
+ * data sets.  An instance of this class can be used as a factory to 
+ * instantiate cost function learning models for a given type of datum.
  * 
  * @author Bill McDowell
  *
@@ -52,15 +45,7 @@ public abstract class CostDatumTools<D extends Datum<L>,L> extends Datum.Tools<D
 		});
 		
 		
-		addGenericModel(new SupervisedModelSVMCLN<D, L>());
-		addGenericModel(new SupervisedModelSVMStructured<D, L>());
-		addGenericModel(new SupervisedModelPartition<D, L>());
-		addGenericModel(new SupervisedModelCLSVM<D, L>());
-		addGenericModel(new SupervisedModelCLSVMAlt<D, L>());
-		addGenericModel(new SupervisedModelCLSVMN<D, L>());
-		addGenericModel(new SupervisedModelCLStructuredSVM<D, L>());
-		addGenericModel(new SupervisedModelCLSVMPlusStructure<D, L>());
-		
+		addGenericModel(new SupervisedModelSVMCLN<D, L>());		
 		
 		addGenericFactoredCost(new FactoredCostConstant<D, L>());
 		addGenericFactoredCost(new FactoredCostLabel<D, L>());

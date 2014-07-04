@@ -18,6 +18,23 @@ import ark.model.SupervisedModel;
 import ark.util.Pair;
 import ark.util.SerializationUtil;
 
+/**
+ * SupervisedModelSVMCLNAda is an implementation of the
+ * cost learning SVM described in paper/nips2014.pdf that
+ * uses Adagrad to minimize the objective function.  This
+ * implementation is slow as it does full rather than sparse
+ * updates of the weight vector.  The newer 
+ * SupervisedModelSVMCLN is an improved implementation that
+ * uses sparse updates.
+ * 
+ * @author Bill McDowell
+ *
+ * @param <D> datum type
+ * @param <L> label type
+ * 
+ * @deprecated Use cost.model.SupervisedModelSVMCLN instead.
+ *
+ */
 public class SupervisedModelSVMCLNAda<D extends Datum<L>, L> extends SupervisedModelSVMAda<D, L> {
 	protected FactoredCost<D, L> factoredCost;
 	protected double[] cost_v;

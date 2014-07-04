@@ -21,6 +21,21 @@ import ark.util.OutputWriter;
 import ark.util.Pair;
 import ark.util.SerializationUtil;
 
+/**
+ * SupervisedModelCL is an abstract cost learning model that 
+ * uses Adagrad to minimize an objective function.  This implementation
+ * is outdated, and does not use sparse updates, and so 
+ * ark.model.SupervisedModelSVM should be used as a parent for 
+ * cost learning classes instead.
+ * 
+ * @author Bill McDowell
+ *
+ * @param <D> datum type
+ * @param <L> label type
+ * 
+ * @deprecated Use ark.model.SupervisedModelSVM and its cost extensions (e.g. 
+ * cost.model.SupervisedModelSVMCLN) instead.
+ */
 public abstract class SupervisedModelCL<D extends Datum<L>, L> extends SupervisedModel<D, L> {
 	protected BidirectionalLookupTable<L, Integer> labelIndices;
 	protected FactoredCost<D, L> factoredCost;

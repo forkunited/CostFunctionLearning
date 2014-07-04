@@ -1,0 +1,24 @@
+SVMCLN()
+{
+	validLabels=L_0,L_1,L_2,L_3
+	trainingIterations=0
+}
+t=1
+numWeights=16
+numCosts=0
+labelFeature=L_0-ThrowAway_0(w=0.1,G=0,u=0,labelIndex=0,featureIndex=0)
+labelFeature=L_0-ThrowAway_1(w=0.2,G=0,u=0,labelIndex=0,featureIndex=1)
+labelFeature=L_0-ThrowAway_2(w=0.4,G=0,u=0,labelIndex=0,featureIndex=2)
+labelFeature=L_0-ThrowAway_3(w=0.8,G=0,u=0,labelIndex=0,featureIndex=3)
+labelFeature=L_1-ThrowAway_0(w=0.1,G=0,u=0,labelIndex=1,featureIndex=0)
+labelFeature=L_1-ThrowAway_1(w=0.2,G=0,u=0,labelIndex=1,featureIndex=1)
+labelFeature=L_1-ThrowAway_2(w=0.4,G=0,u=0,labelIndex=1,featureIndex=2)
+labelFeature=L_1-ThrowAway_3(w=0.8,G=0,u=0,labelIndex=1,featureIndex=3)
+labelFeature=L_2-ThrowAway_0(w=-0.1,G=0,u=0,labelIndex=2,featureIndex=0)
+labelFeature=L_2-ThrowAway_1(w=-0.2,G=0,u=0,labelIndex=2,featureIndex=1)
+labelFeature=L_2-ThrowAway_2(w=-0.4,G=0,u=0,labelIndex=2,featureIndex=2)
+labelFeature=L_2-ThrowAway_3(w=-0.8,G=0,u=0,labelIndex=2,featureIndex=3)
+labelFeature=L_3-ThrowAway_0(w=-0.1,G=0,u=0,labelIndex=3,featureIndex=0)
+labelFeature=L_3-ThrowAway_1(w=-0.2,G=0,u=0,labelIndex=3,featureIndex=1)
+labelFeature=L_3-ThrowAway_2(w=-0.4,G=0,u=0,labelIndex=3,featureIndex=2)
+labelFeature=L_3-ThrowAway_3(w=-0.8,G=0,u=0,labelIndex=3,featureIndex=3)

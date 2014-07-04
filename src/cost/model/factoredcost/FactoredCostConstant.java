@@ -8,6 +8,23 @@ import ark.data.annotation.Datum.Tools;
 import ark.data.feature.FeaturizedDataSet;
 import ark.model.SupervisedModel;
 
+/**
+ * FactoredCostConstant factors represents a factored
+ * cost function (described in paper/nips2014.pdf as the
+ * 's' vector) with a single incorrect prediction class
+ * into which all predictions fall.  Using only a single
+ * incorrect prediction class renders the cost learning
+ * useless, and so this class is just for testing purposes.
+ * 
+ * See cost.model.factoredcost.FactoredCost for generic documentation
+ * on FactoredCosts including this one.
+ * 
+ * @author Bill McDowell
+ *
+ * @param <D> datum type
+ * @param <L> label type
+ * 
+ */
 public class FactoredCostConstant<D extends Datum<L>, L> extends FactoredCost<D, L> {
 	private String[] parameterNames = { "c" };
 	private double c;

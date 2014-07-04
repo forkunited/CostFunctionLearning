@@ -17,21 +17,112 @@ import ark.model.SupervisedModel;
 import ark.util.Pair;
 import ark.util.SerializationUtil;
 
+/**
+ * FactoredCost is an abstract parent to classes that
+ * compute factored cost vectors (referred to as 's' in 
+ * paper/nips2014.pdf) for cost learning models.
+ * Given a model's prediction for
+ * a datum, the FactoredCost outputs a vector that
+ * represents the incorrect prediction sets into which
+ * that prediction falls.
+ * 
+ * @author Bill McDowell
+ *
+ * @param <D> datum type
+ * @param <L> label type
+ */
 public abstract class FactoredCost<D extends Datum<L>, L> {
+	/**
+	 * Initialize the factored cost for some model and data 
+	 * 
+	 * @param model
+	 * @param data
+	 * @return true if everything went okay, false otherwise.
+	 */
 	public abstract boolean init(SupervisedModel<D, L> model, FeaturizedDataSet<D, L> data);
+	
+	/**
+	 * Computes a vector ('s' in paper/nips2014.pdf) that represents the 
+	 * incorrect prediction classes for a given prediction.
+	 * 
+	 * @param datum
+	 * @param prediction
+	 * @return a sparse mapping from vector indices to values.  The values
+	 * of the vector are usually binary indicators of whether the prediction
+	 * is in an incorrect prediction class.
+	 */
 	public abstract Map<Integer, Double> computeVector(D datum, L prediction);
+	
+	/**
+	 * @return a vector of incorrect prediction normalization constants (the
+	 * constant n vector described in paper/nips2014.pdf)
+	 */
 	public abstract double[] getNorms();
+	
+	/**
+	 * @return a name for the factored cost type to use in the experiment 
+	 * configuration files.
+	 */
 	public abstract String getGenericName();
+	
+	/**
+	 * @return length of the factored cost vectors returned by computeVector.
+	 */
 	public abstract int getVocabularySize();
 	
+	/**
+	 * @param predictions
+	 * @return \Kappa difficulties as described in section 2 of 
+	 * papers/previous-approaches.pdf. This is mainly useful for the 
+	 * alternating minimization approach described in previous-approaches.pdf,
+	 * and doesn't need to be implemented unless you plan on using that 
+	 * approach.
+	 */
 	public abstract Map<Integer, Double> computeKappas(Map<D, L> predictions);
 
+	/**
+	 * 
+	 * @param index
+	 * @return a name for the incorrect prediction class corresponding to 
+	 * an indexed position within the vector returned by computeVector
+	 */
 	protected abstract String getVocabularyTerm(int index); 
 	
+	/**
+	 * @return names of parameters that can be set through experiment configuration
+	 * files.  This method and the other 'parameter' related methods are used
+	 * for serialization/deserialization of experiments involving cost learning
+	 * models with factored costs.
+	 */
 	public abstract String[] getParameterNames();
+	
+	/**
+	 * @param parameter
+	 * @return the value of a parameter with the given parameter name
+	 */
 	public abstract String getParameterValue(String parameter);
+	
+	/**
+	 * Sets the value of a parameter
+	 * 
+	 * @param parameter
+	 * @param parameterValue
+	 * @param datumTools
+	 * @return true if the parameter was successfully set, false otherwise
+	 */
 	public abstract boolean setParameterValue(String parameter, String parameterValue, Datum.Tools<D, L> datumTools);
+	
+	/**
+	 * @return an instantiation of a particular the FactoredCost class
+	 */
 	protected abstract FactoredCost<D, L> makeInstance();
+	
+	/*
+	 * All methods below are for deserializing and instantiating factored costs from
+	 * configuration files, similarly to the way in which features and models 
+	 * from the ARKWater project are deserialized and instantiated.  See the ark.data.feature.Feature
+	 * and ark.model.SupervisedModel classes for more detail on how this works.
+	 */
 	
 	public Map<Integer, String> getSpecificShortNamesForIndices(Iterable<Integer> indices) {
 		String prefix = getSpecificShortNamePrefix();

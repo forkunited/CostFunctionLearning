@@ -16,6 +16,26 @@ import ark.model.SupervisedModel;
 import ark.util.Pair;
 import ark.util.SerializationUtil;
 
+/**
+ * SupervisedModelCLSVMPlusStructure is an implementation of a
+ * cost learning SVM that minimizes 
+ * objective function (1) from the paper/previous-approaches.pdf 
+ * document, and imposes constraints on the label structure
+ * at inference time. This implementation is deprecated as it 
+ * extends from the deprecated cost.model.SupervisedModelCL. 
+ * 
+ * @author Bill McDowell
+ *
+ * @param <D> datum type
+ * @param <L> label type
+ * 
+ * @deprecated Use ark.model.SupervisedModelSVMStructured as a
+ * structured SVM instead.  There is currently no recently implemented
+ * structured cost learning SVM, and so if you want one, then you should
+ * implement it by extending either ark.model.SupervisedModelSVM or
+ * ark.model.SupervisedModelSVMStructured, depending on how you design it.
+ *
+ */
 public class SupervisedModelCLSVMPlusStructure<D extends Datum<L>, L> extends SupervisedModelCLSVM<D, L> {	
 	protected String datumStructureOptimizer;
 	protected String datumStructureCollection;
